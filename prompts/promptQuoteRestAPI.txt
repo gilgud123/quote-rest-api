@@ -1,0 +1,46 @@
+create a following Spring Boot REST API in C:\Users\Katya de Vries\IdeaProjects\quote-rest-api:
+
+Build a REST API that persists and displays quotes per authors.
+
+The API should have the following features:
+
+1. entities: Author and Quote with a one-to-many relationship (one author can have multiple quotes).
+1.1 DTOS (use spring record for DTOs) for both Author and Quote.
+
+2. CRUD operations with:
+    * Validation
+    * Pagination & filtering
+    * Error handling
+
+3. Persist data using PostgreSQL.
+* provide database schema (schema.sql) for creating necessary tables
+* provide data initialization script (data.sql) with sample data
+sample data should include at least 3 authors and 5 quotes. Find quotes from Socrates, Plato, and Aristotle.
+
+4. provide a Dockerfile to run the Spring Boot application
+
+4. provide docker compose file with a bridge to run PostgreSQL and the Spring Boot application together.
+
+5. Write unit tests
+
+6. Write integration tests for all controllers, services, and repositories.
+
+7. Provide a README
+
+8. Add Swagger/OpenAPI documentation for all endpoints.
+
+Use following technologies:
+* Spring Boot 3.2.1
+* Spring Data JPA - Data persistence
+* PostgreSQL - Primary database
+* Hibernate - ORM
+* Lombok - Reduce boilerplate code
+* MapStruct - Entity-DTO mapping
+* Jakarta Validation - Input validation
+* Testcontainers - Integration testing with PostgreSQL
+* Maven - Dependency management
+
+Prerequisites:
+* Java 21
+* Maven 3.6+
+* PostgreSQL 12+ (or use Docker Compose)
