@@ -6,6 +6,7 @@ The API should have the following features:
 
 1. entities: Author and Quote with a one-to-many relationship (one author can have multiple quotes).
 1.1 DTOS (use spring record for DTOs) for both Author and Quote.
+1.2 add .gitignore file to exclude target/ and .idea/ directories.
 
 2. CRUD operations with:
     * Validation
