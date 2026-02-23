@@ -1,0 +1,67 @@
+# Docker Compose configuration for Quote REST API
+# Runs PostgreSQL and Spring Boot application together
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: quote-postgres
+    environment:
+      POSTGRES_DB: quotedb
+      POSTGRES_USER: quoteuser
+      POSTGRES_PASSWORD: quotepass
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./scripts/verify-db.sql:/docker-entrypoint-initdb.d/verify-db.sql:ro
+    networks:
+      - quote-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quoteuser -d quotedb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  # Spring Boot Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: quote-rest-api
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/quotedb
+      SPRING_DATASOURCE_USERNAME: quoteuser
+      SPRING_DATASOURCE_PASSWORD: quotepass
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - quote-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+
+# Named volumes for data persistence
+volumes:
+  postgres-data:
+    driver: local
+    name: quote-postgres-data
+
+# Custom network for service communication
+networks:
+  quote-network:
+    driver: bridge
+    name: quote-network

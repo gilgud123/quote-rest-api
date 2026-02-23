@@ -1,0 +1,52 @@
+# Docker ignore file for Quote REST API
+# Excludes unnecessary files from Docker build context
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+dependency-reduced-pom.xml
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.eclipse/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation (not needed in container)
+*.md
+!README.md
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Test files (not needed in production image)
+src/test/
+
+# Scripts
+scripts/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+.env.local

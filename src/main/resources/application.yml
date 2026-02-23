@@ -40,6 +40,20 @@ springdoc:
     path: /swagger-ui.html
     operations-sorter: method
 
+# Spring Boot Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+  health:
+    db:
+      enabled: true
+
 # Logging configuration
 logging:
   level:
