@@ -25,6 +25,7 @@ sample data should include at least 3 authors and 5 quotes. Find quotes from Soc
 5. Write unit tests
 
 6. Write integration tests for all controllers, services, and repositories using testcontainers with postgresql.
+6.1 add code coverage with JaCoCo and ensure at least 80% coverage.
 
 7. Provide a README
 
@@ -40,6 +41,7 @@ Use following technologies:
 * Jakarta Validation - Input validation
 * Testcontainers - Integration testing with PostgreSQL
 * Maven - Dependency management
+* JaCoCo - Code coverage
 
 Prerequisites:
 * Java 21
