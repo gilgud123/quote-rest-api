@@ -48,6 +48,11 @@ cd "C:\Users\Katya de Vries\IdeaProjects\quote-rest-api"
 docker compose up --build
 ```
 
+## Verify schema/data load
+```powershell
+docker exec -i quote-postgres psql -U quoteuser -d quotedb -f /docker-entrypoint-initdb.d/verify-d
+```
+
 ## API Docs
 After the app starts:
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
