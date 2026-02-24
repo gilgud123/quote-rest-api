@@ -24,7 +24,7 @@ sample data should include at least 3 authors and 5 quotes. Find quotes from Soc
 
 5. Write unit tests
 
-6. Write integration tests for all controllers, services, and repositories.
+6. Write integration tests for all controllers, services, and repositories using testcontainers with postgresql.
 
 7. Provide a README
 
