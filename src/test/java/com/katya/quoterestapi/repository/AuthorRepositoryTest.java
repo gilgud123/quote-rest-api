@@ -98,15 +98,33 @@ class AuthorRepositoryTest {
     void shouldFindByBirthYearBetween() {
         Page<Author> result = authorRepository.findByBirthYearBetween(null, -350, pageable);
 
-        assertThat(result.getTotalElements()).isGreaterThanOrEqualTo(3);
+        assertThat(result.getTotalElements()).isEqualTo(3);
     }
 
     @Test
-    @DisplayName("Should find author by exact name")
-    void shouldFindByName() {
-        Author author = authorRepository.findByName("Plato").orElseThrow();
+    @DisplayName("Should find authors by birth year range with min only")
+    void shouldFindByBirthYearBetweenMinOnly() {
+        Page<Author> result = authorRepository.findByBirthYearBetween(-400, null, pageable);
 
-        assertThat(author.getName()).isEqualTo("Plato");
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().get(0).getName()).isEqualTo("Aristotle");
+    }
+
+    @Test
+    @DisplayName("Should find authors by birth year range with max only")
+    void shouldFindByBirthYearBetweenMaxOnly() {
+        Page<Author> result = authorRepository.findByBirthYearBetween(null, -420, pageable);
+
+        assertThat(result.getTotalElements()).isEqualTo(2);
+        assertThat(result.getContent())
+                .extracting(Author::getName)
+                .containsExactlyInAnyOrder("Socrates", "Plato");
+    }
+
+    @Test
+    @DisplayName("Should return empty when author name not found")
+    void shouldReturnEmptyWhenNameNotFound() {
+        assertThat(authorRepository.findByName("Unknown Author")).isEmpty();
     }
 
     @Test
@@ -127,5 +145,25 @@ class AuthorRepositoryTest {
         long count = authorRepository.countQuotesByAuthorId(author.getId());
 
         assertThat(count).isEqualTo(4);
+    }
+
+    @Test
+    @DisplayName("Should find author by exact name")
+    void shouldFindByExactName() {
+        Author author = authorRepository.findByName("Plato").orElseThrow();
+
+        assertThat(author.getName()).isEqualTo("Plato");
+        assertThat(author.getBirthYear()).isEqualTo(-428);
+    }
+
+    @Test
+    @DisplayName("Should return all authors when birth year range has no bounds")
+    void shouldReturnAllAuthorsWhenRangeIsNull() {
+        Page<Author> result = authorRepository.findByBirthYearBetween(null, null, pageable);
+
+        assertThat(result.getTotalElements()).isEqualTo(3);
+        assertThat(result.getContent())
+                .extracting(Author::getName)
+                .containsExactlyInAnyOrder("Socrates", "Plato", "Aristotle");
     }
 }

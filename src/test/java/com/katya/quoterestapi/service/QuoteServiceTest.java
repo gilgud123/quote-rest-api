@@ -374,4 +374,77 @@ class QuoteServiceTest {
         verify(authorRepository, never()).existsById(any());
         verify(quoteRepository).findWithFilters(null, category, null, pageable);
     }
+
+    @Test
+    @DisplayName("Should search quotes by author name")
+    void shouldSearchQuotesByAuthorName() {
+        String authorName = "Socrates";
+        Page<Quote> quotePage = new PageImpl<>(List.of(testQuote));
+        when(quoteRepository.findByAuthorNameContaining(authorName, pageable)).thenReturn(quotePage);
+        when(quoteMapper.toDto(testQuote)).thenReturn(testQuoteDTO);
+
+        Page<QuoteDTO> result = quoteService.searchQuotesByAuthorName(authorName, pageable);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+        verify(quoteRepository).findByAuthorNameContaining(authorName, pageable);
+    }
+
+    @Test
+    @DisplayName("Should perform general search across quotes")
+    void shouldSearchQuotes() {
+        String searchTerm = "life";
+        Page<Quote> quotePage = new PageImpl<>(List.of(testQuote));
+        when(quoteRepository.searchQuotes(searchTerm, pageable)).thenReturn(quotePage);
+        when(quoteMapper.toDto(testQuote)).thenReturn(testQuoteDTO);
+
+        Page<QuoteDTO> result = quoteService.searchQuotes(searchTerm, pageable);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+        verify(quoteRepository).searchQuotes(searchTerm, pageable);
+    }
+
+    @Test
+    @DisplayName("Should throw exception when filtering with missing author")
+    void shouldThrowExceptionWhenFilteringWithMissingAuthor() {
+        when(authorRepository.existsById(999L)).thenReturn(false);
+
+        assertThatThrownBy(() -> quoteService.filterQuotes(999L, "Philosophy", null, pageable))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Author not found with id: 999");
+        verify(authorRepository).existsById(999L);
+        verify(quoteRepository, never()).findWithFilters(any(), any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when updating quote with missing new author")
+    void shouldThrowExceptionWhenUpdatingWithMissingAuthor() {
+        QuoteDTO updateDTO = new QuoteDTO(null, "Updated text", null, "Philosophy", 2L, null, null, null);
+        when(quoteRepository.findById(1L)).thenReturn(Optional.of(testQuote));
+        when(authorRepository.findById(2L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> quoteService.updateQuote(1L, updateDTO))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Author not found with id: 2");
+        verify(quoteRepository).findById(1L);
+        verify(authorRepository).findById(2L);
+        verify(quoteRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should patch quote using update logic")
+    void shouldPatchQuote() {
+        QuoteDTO patchDTO = new QuoteDTO(null, "Patched text", null, "Wisdom", 1L, null, null, null);
+        when(quoteRepository.findById(1L)).thenReturn(Optional.of(testQuote));
+        when(quoteRepository.save(testQuote)).thenReturn(testQuote);
+        when(quoteMapper.toDto(testQuote)).thenReturn(testQuoteDTO);
+
+        QuoteDTO result = quoteService.patchQuote(1L, patchDTO);
+
+        assertThat(result).isNotNull();
+        verify(quoteRepository).findById(1L);
+        verify(quoteMapper).updateEntityFromDto(patchDTO, testQuote);
+        verify(quoteRepository).save(testQuote);
+    }
 }

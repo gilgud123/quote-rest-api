@@ -298,4 +298,75 @@ class AuthorServiceTest {
         assertThat(notExists).isFalse();
         verify(authorRepository, times(2)).existsById(any());
     }
+
+    @Test
+    @DisplayName("Should get author by ID without quotes")
+    void shouldGetAuthorByIdWithoutQuotes() {
+        when(authorRepository.findById(1L)).thenReturn(Optional.of(testAuthor));
+        when(authorMapper.toDtoWithoutQuotes(testAuthor)).thenReturn(testAuthorDTO);
+
+        AuthorDTO result = authorService.getAuthorByIdWithoutQuotes(1L);
+
+        assertThat(result).isNotNull();
+        assertThat(result.id()).isEqualTo(1L);
+        verify(authorRepository).findById(1L);
+        verify(authorMapper).toDtoWithoutQuotes(testAuthor);
+    }
+
+    @Test
+    @DisplayName("Should filter authors by birth year range")
+    void shouldFilterAuthorsByBirthYearRange() {
+        Page<Author> authorPage = new PageImpl<>(List.of(testAuthor));
+        when(authorRepository.findByBirthYearBetween(-500, -300, pageable)).thenReturn(authorPage);
+        when(authorMapper.toDtoWithoutQuotes(testAuthor)).thenReturn(testAuthorDTO);
+
+        Page<AuthorDTO> result = authorService.filterAuthorsByBirthYearRange(-500, -300, pageable);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+        verify(authorRepository).findByBirthYearBetween(-500, -300, pageable);
+    }
+
+    @Test
+    @DisplayName("Should throw exception when updating author with duplicate name")
+    void shouldThrowExceptionWhenUpdatingWithDuplicateName() {
+        AuthorDTO updateDTO = new AuthorDTO(null, "Plato", "Bio", -428, -348, null, null);
+        when(authorRepository.findById(1L)).thenReturn(Optional.of(testAuthor));
+        when(authorRepository.existsByName("Plato")).thenReturn(true);
+
+        assertThatThrownBy(() -> authorService.updateAuthor(1L, updateDTO))
+                .isInstanceOf(ResourceAlreadyExistsException.class)
+                .hasMessageContaining("Author already exists with name: Plato");
+        verify(authorRepository).findById(1L);
+        verify(authorRepository).existsByName("Plato");
+        verify(authorRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should patch author using update logic")
+    void shouldPatchAuthor() {
+        AuthorDTO patchDTO = new AuthorDTO(null, "Socrates", "Patched biography", -469, -399, null, null);
+        when(authorRepository.findById(1L)).thenReturn(Optional.of(testAuthor));
+        when(authorRepository.save(testAuthor)).thenReturn(testAuthor);
+        when(authorMapper.toDtoWithoutQuotes(testAuthor)).thenReturn(testAuthorDTO);
+
+        AuthorDTO result = authorService.patchAuthor(1L, patchDTO);
+
+        assertThat(result).isNotNull();
+        verify(authorRepository).findById(1L);
+        verify(authorMapper).updateEntityFromDto(patchDTO, testAuthor);
+        verify(authorRepository).save(testAuthor);
+    }
+
+    @Test
+    @DisplayName("Should throw exception when getting quote count for missing author")
+    void shouldThrowExceptionWhenGetQuoteCountMissingAuthor() {
+        when(authorRepository.existsById(999L)).thenReturn(false);
+
+        assertThatThrownBy(() -> authorService.getQuoteCountForAuthor(999L))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Author not found with id: 999");
+        verify(authorRepository).existsById(999L);
+        verify(authorRepository, never()).countQuotesByAuthorId(any());
+    }
 }

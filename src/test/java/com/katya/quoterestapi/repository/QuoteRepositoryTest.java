@@ -128,12 +128,29 @@ class QuoteRepositoryTest {
     }
 
     @Test
+    @DisplayName("Should return empty when no quotes for author id")
+    void shouldReturnEmptyWhenNoQuotesForAuthorId() {
+        Page<Quote> result = quoteRepository.findByAuthorId(999L, pageable);
+
+        assertThat(result.getTotalElements()).isEqualTo(0);
+        assertThat(result.getContent()).isEmpty();
+    }
+
+    @Test
     @DisplayName("Should find quotes by text containing ignore case")
     void shouldFindByTextContainingIgnoreCase() {
         Page<Quote> result = quoteRepository.findByTextContainingIgnoreCase("UNEXAMINED", pageable);
 
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).getText()).containsIgnoringCase("unexamined");
+    }
+
+    @Test
+    @DisplayName("Should return empty when text search has no matches")
+    void shouldReturnEmptyWhenTextSearchHasNoMatches() {
+        Page<Quote> result = quoteRepository.findByTextContainingIgnoreCase("nonexistent", pageable);
+
+        assertThat(result.getTotalElements()).isEqualTo(0);
     }
 
     @Test
@@ -170,12 +187,34 @@ class QuoteRepositoryTest {
     }
 
     @Test
+    @DisplayName("Should find quotes by author name case-insensitive")
+    void shouldFindByAuthorNameContainingCaseInsensitive() {
+        Page<Quote> result = quoteRepository.findByAuthorNameContaining("PLA", pageable);
+
+        assertThat(result.getTotalElements()).isEqualTo(3);
+        assertThat(result.getContent())
+                .extracting(Quote::getText)
+                .allMatch(text -> text != null && !text.isBlank());
+    }
+
+    @Test
     @DisplayName("Should search quotes by text or author name")
     void shouldSearchQuotes() {
         Page<Quote> result = quoteRepository.searchQuotes("light", pageable);
 
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).getText()).containsIgnoringCase("light");
+    }
+
+    @Test
+    @DisplayName("Should search quotes by author name term")
+    void shouldSearchQuotesByAuthorNameTerm() {
+        Page<Quote> result = quoteRepository.searchQuotes("Plato", pageable);
+
+        assertThat(result.getTotalElements()).isEqualTo(3);
+        assertThat(result.getContent())
+                .extracting(Quote::getCategory)
+                .containsExactlyInAnyOrder("Wisdom", "Philosophy", "Politics");
     }
 
     @Test
@@ -187,6 +226,17 @@ class QuoteRepositoryTest {
 
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).getCategory()).isEqualTo("Politics");
+    }
+
+    @Test
+    @DisplayName("Should find quotes with filters when authorId is null")
+    void shouldFindWithFiltersWhenAuthorIdNull() {
+        Page<Quote> result = quoteRepository.findWithFilters(null, "Wisdom", null, pageable);
+
+        assertThat(result.getTotalElements()).isEqualTo(4);
+        assertThat(result.getContent())
+                .extracting(Quote::getCategory)
+                .containsOnly("Wisdom");
     }
 
     @Test
