@@ -31,6 +31,10 @@ sample data should include at least 3 authors and 5 quotes. Find quotes from Soc
 
 8. Add Swagger/OpenAPI documentation for all endpoints.
 
+9. Implement Keycloak authentication and authorization for the API, securing all endpoints and providing role-based access control.
+
+10. Implement logging with SLF4J and Logback.
+
 Use following technologies:
 * Spring Boot 3.2.1
 * Spring Data JPA - Data persistence

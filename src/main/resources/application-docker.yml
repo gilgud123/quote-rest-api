@@ -1,12 +1,18 @@
+# PostgreSQL Database Configuration for Docker
+
 spring:
   application:
     name: quote-rest-api
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/quotedb
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://postgres:5432/quotedb
+    username: quoteuser
+    password: quotepass
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
 
   jpa:
     hibernate:
@@ -16,6 +22,10 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
     open-in-view: false
 
   sql:
@@ -29,7 +39,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8081/realms/quote}
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://keycloak:8080/realms/quote}
 
 app:
   security:
@@ -42,6 +52,7 @@ server:
   error:
     include-message: always
     include-binding-errors: always
+    include-stacktrace: on_param
 
 # Springdoc OpenAPI configuration
 springdoc:
@@ -50,24 +61,14 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     operations-sorter: method
-
-# Spring Boot Actuator
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics
-      base-path: /actuator
-  endpoint:
-    health:
-      show-details: when-authorized
-  health:
-    db:
-      enabled: true
+    tags-sorter: alpha
 
 # Logging configuration
 logging:
   level:
-    com.katya.quoterestapi: DEBUG
+    com.katya.quoterestapi: INFO
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.jdbc: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"

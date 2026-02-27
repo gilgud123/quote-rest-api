@@ -1,0 +1,54 @@
+# Angular 20 Frontend Plan for quote-rest-api
+
+## Checklist
+- [ ] Choose frontend location and API base URL strategy
+- [ ] Scaffold Angular 20 app and configure environments
+- [ ] Define models and API services
+- [ ] Build routes and UI for authors and quotes
+- [ ] Add state caching, tests, and deployment config
+
+## Detailed Plan
+
+### 1) Project Setup
+- Decide location: `frontend/` inside this repo vs separate repo.
+- Scaffold Angular 20 with standalone components and modern control flow.
+- Set `environment.ts` and `environment.prod.ts` with `apiBaseUrl`.
+- Optional: configure a local dev proxy to avoid CORS in development.
+
+### 2) API Discovery
+- Use `references/ALL_ENDPOINTS_REFERENCE.md` to confirm endpoints.
+- Expected endpoints:
+  - `GET /api/v1/authors`
+  - `GET /api/v1/authors/{id}/quotes`
+- Verify response shapes and any pagination or sorting options.
+
+### 3) Data Modeling
+- Define `Author` and `Quote` interfaces.
+- Add a generic API response wrapper if backend uses one.
+
+### 4) Services
+- `AuthorService`: fetch authors, apply A–Z sorting client-side if not server-sorted.
+- `QuoteService`: fetch quotes by author id.
+- Centralize error handling and loading state.
+
+### 5) Routing & UI
+- Routes:
+  - `/authors` (default) -> Authors list
+  - `/authors/:id` -> Author detail with quotes
+- Components:
+  - `AuthorsListComponent`: display authors A–Z; click to view detail.
+  - `AuthorDetailComponent`: show author name and quotes list.
+  - Shared UI: loading indicator, error banner, empty-state.
+
+### 6) State & Caching
+- Use lightweight signals or service-level store to cache authors and quotes.
+- Avoid NgRx unless scope grows.
+
+### 7) Tests
+- Unit tests for services and components.
+- Integration test for list + detail flow if time permits.
+
+### 8) Build & Deployment
+- Set `apiBaseUrl` via envs.
+- Confirm CORS on backend or use dev proxy.
+- Decide deployment: static hosting, Docker, or served with backend.

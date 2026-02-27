@@ -38,8 +38,12 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/quotedb
       SPRING_DATASOURCE_USERNAME: quoteuser
       SPRING_DATASOURCE_PASSWORD: quotepass
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/quote
+      KEYCLOAK_CLIENT_ID: quote-api
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8787"
     ports:
       - "8080:8080"
+      - "8787:8787" # Debug port
     depends_on:
       postgres:
         condition: service_healthy
@@ -51,6 +55,23 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+    restart: unless-stopped
+
+  # Keycloak Authentication Server
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.5
+    container_name: quote-keycloak
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_PORT: 8080
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./keycloak/realm-quote.json:/opt/keycloak/data/import/realm-quote.json:ro
+    networks:
+      - quote-network
     restart: unless-stopped
 
 # Named volumes for data persistence

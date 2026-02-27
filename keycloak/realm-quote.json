@@ -1,0 +1,63 @@
+{
+  "realm": "quote",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "USER",
+        "description": "Read-only API access"
+      },
+      {
+        "name": "ADMIN",
+        "description": "Full API access"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "quote-api",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "protocol": "openid-connect",
+      "redirectUris": ["*"],
+      "webOrigins": ["*"]
+    }
+  ],
+  "users": [
+    {
+      "username": "api-user",
+      "firstName": "API",
+      "lastName": "User",
+      "email": "api-user@example.com",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["USER"]
+    },
+    {
+      "username": "api-admin",
+      "firstName": "API",
+      "lastName": "Admin",
+      "email": "api-admin@example.com",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["ADMIN", "USER"]
+    }
+  ]
+}

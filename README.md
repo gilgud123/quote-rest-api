@@ -48,6 +48,8 @@ cd "C:\Users\Katya de Vries\IdeaProjects\quote-rest-api"
 docker compose up --build
 ```
 
+After startup, Keycloak is available at `http://localhost:8081`.
+
 ## Verify schema/data load
 ```powershell
 docker exec -i quote-postgres psql -U quoteuser -d quotedb -f /docker-entrypoint-initdb.d/verify-d
@@ -71,3 +73,32 @@ JaCoCo report:
 ## Notes
 - Integration tests in this project use H2 and Spring Boot test context with seeded data.
 - If you switch integration tests to Testcontainers, update the test configuration accordingly.
+
+## Keycloak (Step 9)
+The API uses Keycloak-issued JWTs. In Docker, Keycloak is started automatically and imports a realm.
+
+### Default Realm and Users
+- Realm: `quote`
+- Client ID: `quote-api`
+- Users:
+  - `api-user` / `password` (role `USER`)
+  - `api-admin` / `password` (roles `ADMIN`, `USER`)
+
+### Get an Access Token (Docker)
+```powershell
+$token = docker run --rm --network quote-network curlimages/curl:8.5.0 `
+  -s -X POST "http://keycloak:8080/realms/quote/protocol/openid-connect/token" `
+  -H "Content-Type: application/x-www-form-urlencoded" `
+  -d "client_id=quote-api&grant_type=password&username=api-user&password=password" `
+  | ConvertFrom-Json | Select-Object -ExpandProperty access_token
+```
+
+### Call the API
+```powershell
+Invoke-RestMethod -Headers @{ Authorization = "Bearer $token" } -Uri "http://localhost:8080/api/v1/quotes"
+```
+
+### Why Postman Tokens Can Return 401
+When the app runs in Docker, it expects issuer `http://keycloak:8080/realms/quote`.
+Tokens requested from `http://localhost:8081` have issuer `http://localhost:8081/realms/quote` and will be rejected.
+Use the Docker token command above or align the app issuer with the external URL.
