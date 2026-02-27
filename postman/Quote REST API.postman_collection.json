@@ -1,0 +1,894 @@
+{
+  "info": {
+    "_postman_id": "4dedc401-8ad8-423c-9a6d-03abcc2df9ab",
+    "name": "Quote REST API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "8080287"
+  },
+  "item": [
+    {
+      "name": "get all authors",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/authors",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "authors"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get access token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Extract access_token from a successful JSON response and store it in the active environment variable `token`",
+              "",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "if (pm.response.code === 200) {",
+              "    let json;",
+              "    try {",
+              "        json = pm.response.json();",
+              "    } catch (e) {",
+              "        pm.test(\"Response is valid JSON\", function () {",
+              "            pm.expect.fail(\"Response body is not valid JSON: \" + e.message);",
+              "        });",
+              "        json = null;",
+              "    }",
+              "",
+              "    if (json) {",
+              "        pm.test(\"Response contains access_token\", function () {",
+              "            pm.expect(json).to.have.property(\"access_token\");",
+              "            pm.expect(json.access_token).to.be.a(\"string\").and.to.not.be.empty;",
+              "        });",
+              "",
+              "        if (typeof json.access_token === \"string\" && json.access_token.length > 0) {",
+              "            pm.environment.set(\"token\", json.access_token);",
+              "        }",
+              "    }",
+              "}",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "",
+            "type": "text",
+            "disabled": true
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "client_id",
+              "value": "quote-api",
+              "type": "text",
+              "uuid": "e6ad5e25-aceb-4c4b-9b3c-dfbb841d2ce9"
+            },
+            {
+              "key": "grant_type",
+              "value": "password",
+              "type": "text",
+              "uuid": "2316f1db-63e7-47cc-b8d8-5738d682230d"
+            },
+            {
+              "key": "username",
+              "value": "api-admin",
+              "type": "text",
+              "uuid": "9b3313be-0021-433c-a61d-bc4507ab23c3"
+            },
+            {
+              "key": "password",
+              "value": "password",
+              "type": "text",
+              "uuid": "f61d69b3-9704-411b-82b3-9754719deed1"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:8081/realms/quote/protocol/openid-connect/token",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8081",
+          "path": [
+            "realms",
+            "quote",
+            "protocol",
+            "openid-connect",
+            "token"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get author",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Sanitize Bearer token to avoid invalid header characters (newlines/quotes/Bearer prefix)",
+              "let t = pm.variables.get('token');",
+              "if (t !== undefined && t !== null) {",
+              "  t = String(t);",
+              "  // Trim whitespace including newlines",
+              "  t = t.trim();",
+              "  // Remove surrounding quotes (single or double)",
+              "  t = t.replace(/^['\"]+|['\"]+$/g, '');",
+              "  // Remove leading \"Bearer \" prefix if present",
+              "  t = t.replace(/^Bearer\\s+/i, '');",
+              "  // Remove any remaining CR/LF that could break headers",
+              "  t = t.replace(/[\\r\\n]+/g, '');",
+              "",
+              "  // Set back into the active environment if available, else local",
+              "  if (pm.environment && pm.environment.get('token') !== undefined) {",
+              "    pm.environment.set('token', t);",
+              "  } else {",
+              "    pm.variables.set('token', t);",
+              "  }",
+              "}",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/authors",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "authors"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "delete author",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Sanitize Bearer token to avoid invalid header characters (newlines/quotes/Bearer prefix)",
+              "let t = pm.variables.get('token');",
+              "if (t !== undefined && t !== null) {",
+              "  t = String(t);",
+              "  // Trim whitespace including newlines",
+              "  t = t.trim();",
+              "  // Remove surrounding quotes (single or double)",
+              "  t = t.replace(/^['\"]+|['\"]+$/g, '');",
+              "  // Remove leading \"Bearer \" prefix if present",
+              "  t = t.replace(/^Bearer\\s+/i, '');",
+              "  // Remove any remaining CR/LF that could break headers",
+              "  t = t.replace(/[\\r\\n]+/g, '');",
+              "",
+              "  // Set back into the active environment if available, else local",
+              "  if (pm.environment && pm.environment.get('token') !== undefined) {",
+              "    pm.environment.set('token', t);",
+              "  } else {",
+              "    pm.variables.set('token', t);",
+              "  }",
+              "}",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/authors/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "authors",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get author stats",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Sanitize Bearer token to avoid invalid header characters (newlines/quotes/Bearer prefix)",
+              "let t = pm.variables.get('token');",
+              "if (t !== undefined && t !== null) {",
+              "  t = String(t);",
+              "  // Trim whitespace including newlines",
+              "  t = t.trim();",
+              "  // Remove surrounding quotes (single or double)",
+              "  t = t.replace(/^['\"]+|['\"]+$/g, '');",
+              "  // Remove leading \"Bearer \" prefix if present",
+              "  t = t.replace(/^Bearer\\s+/i, '');",
+              "  // Remove any remaining CR/LF that could break headers",
+              "  t = t.replace(/[\\r\\n]+/g, '');",
+              "",
+              "  // Set back into the active environment if available, else local",
+              "  if (pm.environment && pm.environment.get('token') !== undefined) {",
+              "    pm.environment.set('token', t);",
+              "  } else {",
+              "    pm.variables.set('token', t);",
+              "  }",
+              "}",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/authors/1/stats",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "authors",
+            "1",
+            "stats"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get author quotes",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Sanitize Bearer token to avoid invalid header characters (newlines/quotes/Bearer prefix)",
+              "let t = pm.variables.get('token');",
+              "if (t !== undefined && t !== null) {",
+              "  t = String(t);",
+              "  // Trim whitespace including newlines",
+              "  t = t.trim();",
+              "  // Remove surrounding quotes (single or double)",
+              "  t = t.replace(/^['\"]+|['\"]+$/g, '');",
+              "  // Remove leading \"Bearer \" prefix if present",
+              "  t = t.replace(/^Bearer\\s+/i, '');",
+              "  // Remove any remaining CR/LF that could break headers",
+              "  t = t.replace(/[\\r\\n]+/g, '');",
+              "",
+              "  // Set back into the active environment if available, else local",
+              "  if (pm.environment && pm.environment.get('token') !== undefined) {",
+              "    pm.environment.set('token', t);",
+              "  } else {",
+              "    pm.variables.set('token', t);",
+              "  }",
+              "}",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/authors/1/quotes",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "authors",
+            "1",
+            "quotes"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "filter author by",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Sanitize Bearer token to avoid invalid header characters (newlines/quotes/Bearer prefix)",
+              "let t = pm.variables.get('token');",
+              "if (t !== undefined && t !== null) {",
+              "  t = String(t);",
+              "  // Trim whitespace including newlines",
+              "  t = t.trim();",
+              "  // Remove surrounding quotes (single or double)",
+              "  t = t.replace(/^['\"]+|['\"]+$/g, '');",
+              "  // Remove leading \"Bearer \" prefix if present",
+              "  t = t.replace(/^Bearer\\s+/i, '');",
+              "  // Remove any remaining CR/LF that could break headers",
+              "  t = t.replace(/[\\r\\n]+/g, '');",
+              "",
+              "  // Set back into the active environment if available, else local",
+              "  if (pm.environment && pm.environment.get('token') !== undefined) {",
+              "    pm.environment.set('token', t);",
+              "  } else {",
+              "    pm.variables.set('token', t);",
+              "  }",
+              "}",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/authors/filter?page=0&size=10&sortBy=birthYear&direction=ASC",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "authors",
+            "filter"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "0"
+            },
+            {
+              "key": "size",
+              "value": "10"
+            },
+            {
+              "key": "sortBy",
+              "value": "birthYear"
+            },
+            {
+              "key": "direction",
+              "value": "ASC"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "search author by name",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Sanitize Bearer token to avoid invalid header characters (newlines/quotes/Bearer prefix)",
+              "let t = pm.variables.get('token');",
+              "if (t !== undefined && t !== null) {",
+              "  t = String(t);",
+              "  // Trim whitespace including newlines",
+              "  t = t.trim();",
+              "  // Remove surrounding quotes (single or double)",
+              "  t = t.replace(/^['\"]+|['\"]+$/g, '');",
+              "  // Remove leading \"Bearer \" prefix if present",
+              "  t = t.replace(/^Bearer\\s+/i, '');",
+              "  // Remove any remaining CR/LF that could break headers",
+              "  t = t.replace(/[\\r\\n]+/g, '');",
+              "",
+              "  // Set back into the active environment if available, else local",
+              "  if (pm.environment && pm.environment.get('token') !== undefined) {",
+              "    pm.environment.set('token', t);",
+              "  } else {",
+              "    pm.variables.set('token', t);",
+              "  }",
+              "}",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/authors/search?name=Plato&page=0&size=10&sortBy=name&direction=ASC",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "authors",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "name",
+              "value": "Plato"
+            },
+            {
+              "key": "page",
+              "value": "0"
+            },
+            {
+              "key": "size",
+              "value": "10"
+            },
+            {
+              "key": "sortBy",
+              "value": "name"
+            },
+            {
+              "key": "direction",
+              "value": "ASC"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "create author",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Sanitize Bearer token to avoid invalid header characters (newlines/quotes/Bearer prefix)",
+              "let t = pm.variables.get('token');",
+              "if (t !== undefined && t !== null) {",
+              "  t = String(t);",
+              "  // Trim whitespace including newlines",
+              "  t = t.trim();",
+              "  // Remove surrounding quotes (single or double)",
+              "  t = t.replace(/^['\"]+|['\"]+$/g, '');",
+              "  // Remove leading \"Bearer \" prefix if present",
+              "  t = t.replace(/^Bearer\\s+/i, '');",
+              "  // Remove any remaining CR/LF that could break headers",
+              "  t = t.replace(/[\\r\\n]+/g, '');",
+              "",
+              "  // Set back into the active environment if available, else local",
+              "  if (pm.environment && pm.environment.get('token') !== undefined) {",
+              "    pm.environment.set('token', t);",
+              "  } else {",
+              "    pm.variables.set('token', t);",
+              "  }",
+              "}",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"id\": 1,\r\n  \"name\": \"Socrates\",\r\n  \"biography\": \"Ancient Greek philosopher...\",\r\n  \"birthYear\": -469,\r\n  \"deathYear\": -399,\r\n  \"quotes\": [\r\n    {\r\n      \"id\": 1,\r\n      \"text\": \"The unexamined life is not worth living.\",\r\n      \"context\": \"At his trial\",\r\n      \"category\": \"Philosophy\",\r\n      \"authorId\": 1,\r\n      \"authorName\": \"string\",\r\n      \"createdAt\": \"2026-02-27T12:04:44.670Z\",\r\n      \"updatedAt\": \"2026-02-27T12:04:44.670Z\"\r\n    }\r\n  ],\r\n  \"createdAt\": \"2026-02-27T12:04:44.670Z\",\r\n  \"updatedAt\": \"2026-02-27T12:04:44.670Z\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/authors",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "authors"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "partially update author",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Sanitize Bearer token to avoid invalid header characters (newlines/quotes/Bearer prefix)",
+              "let t = pm.variables.get('token');",
+              "if (t !== undefined && t !== null) {",
+              "  t = String(t);",
+              "  // Trim whitespace including newlines",
+              "  t = t.trim();",
+              "  // Remove surrounding quotes (single or double)",
+              "  t = t.replace(/^['\"]+|['\"]+$/g, '');",
+              "  // Remove leading \"Bearer \" prefix if present",
+              "  t = t.replace(/^Bearer\\s+/i, '');",
+              "  // Remove any remaining CR/LF that could break headers",
+              "  t = t.replace(/[\\r\\n]+/g, '');",
+              "",
+              "  // Set back into the active environment if available, else local",
+              "  if (pm.environment && pm.environment.get('token') !== undefined) {",
+              "    pm.environment.set('token', t);",
+              "  } else {",
+              "    pm.variables.set('token', t);",
+              "  }",
+              "}",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"id\": 4,\r\n  \"name\": \"Socrates\",\r\n  \"biography\": \"Ancient Greek philosopher...\",\r\n  \"birthYear\": -469,\r\n  \"deathYear\": -399,\r\n  \"quotes\": [\r\n    {\r\n      \"id\": 1,\r\n      \"text\": \"The unexamined life is not worth living.\",\r\n      \"context\": \"At his trial\",\r\n      \"category\": \"Philosophy\",\r\n      \"authorId\": 4,\r\n      \"authorName\": \"string\",\r\n      \"createdAt\": \"2026-02-27T12:04:44.670Z\",\r\n      \"updatedAt\": \"2026-02-27T12:04:44.670Z\"\r\n    }\r\n  ],\r\n  \"createdAt\": \"2026-02-27T12:04:44.670Z\",\r\n  \"updatedAt\": \"2026-02-27T12:04:44.670Z\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/authors/4",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "authors",
+            "4"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "update author",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Sanitize Bearer token to avoid invalid header characters (newlines/quotes/Bearer prefix)",
+              "let t = pm.variables.get('token');",
+              "if (t !== undefined && t !== null) {",
+              "  t = String(t);",
+              "  // Trim whitespace including newlines",
+              "  t = t.trim();",
+              "  // Remove surrounding quotes (single or double)",
+              "  t = t.replace(/^['\"]+|['\"]+$/g, '');",
+              "  // Remove leading \"Bearer \" prefix if present",
+              "  t = t.replace(/^Bearer\\s+/i, '');",
+              "  // Remove any remaining CR/LF that could break headers",
+              "  t = t.replace(/[\\r\\n]+/g, '');",
+              "",
+              "  // Set back into the active environment if available, else local",
+              "  if (pm.environment && pm.environment.get('token') !== undefined) {",
+              "    pm.environment.set('token', t);",
+              "  } else {",
+              "    pm.variables.set('token', t);",
+              "  }",
+              "}",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"id\": 1,\r\n  \"name\": \"Socrates\",\r\n  \"biography\": \"Ancient Greek philosopher...\",\r\n  \"birthYear\": -469,\r\n  \"deathYear\": -399,\r\n  \"quotes\": [\r\n    {\r\n      \"id\": 1,\r\n      \"text\": \"The unexamined life is not worth living.\",\r\n      \"context\": \"At his trial\",\r\n      \"category\": \"Philosophy\",\r\n      \"authorId\": 4,\r\n      \"authorName\": \"string\",\r\n      \"createdAt\": \"2026-02-27T12:09:55.529Z\",\r\n      \"updatedAt\": \"2026-02-27T12:09:55.529Z\"\r\n    }\r\n  ],\r\n  \"createdAt\": \"2026-02-27T12:09:55.529Z\",\r\n  \"updatedAt\": \"2026-02-27T12:09:55.529Z\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/authors/4",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "authors",
+            "4"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get all quotes",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"id\": 1,\r\n  \"name\": \"Socrates\",\r\n  \"biography\": \"Ancient Greek philosopher...\",\r\n  \"birthYear\": -469,\r\n  \"deathYear\": -399,\r\n  \"quotes\": [\r\n    {\r\n      \"id\": 1,\r\n      \"text\": \"The unexamined life is not worth living.\",\r\n      \"context\": \"At his trial\",\r\n      \"category\": \"Philosophy\",\r\n      \"authorId\": 4,\r\n      \"authorName\": \"string\",\r\n      \"createdAt\": \"2026-02-27T12:09:55.529Z\",\r\n      \"updatedAt\": \"2026-02-27T12:09:55.529Z\"\r\n    }\r\n  ],\r\n  \"createdAt\": \"2026-02-27T12:09:55.529Z\",\r\n  \"updatedAt\": \"2026-02-27T12:09:55.529Z\"\r\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/quotes",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "quotes"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get quote by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/quotes/10",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "quotes",
+            "10"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
