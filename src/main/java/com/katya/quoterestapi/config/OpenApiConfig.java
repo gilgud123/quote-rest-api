@@ -40,6 +40,8 @@ public class OpenApiConfig {
         Operation tokenOperation = new Operation()
                 .summary("Get access token (Keycloak)")
                 .description("Keycloak token endpoint. Use application/x-www-form-urlencoded.")
+                // Override global security so Swagger does not send Authorization here.
+                .security(java.util.Collections.emptyList())
                 .requestBody(new RequestBody()
                         .required(true)
                         .content(new Content().addMediaType(
