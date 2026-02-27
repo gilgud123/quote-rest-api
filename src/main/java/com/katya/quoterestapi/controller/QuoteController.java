@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import com.katya.quoterestapi.config.OpenApiConfig;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -36,6 +38,7 @@ import java.util.List;
 @Slf4j
 @Validated
 @Tag(name = "Quotes", description = "API for managing quotes")
+@SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME)
 public class QuoteController {
 
     private final QuoteService quoteService;

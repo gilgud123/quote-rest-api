@@ -1,5 +1,6 @@
 package com.katya.quoterestapi.controller;
 
+import com.katya.quoterestapi.config.OpenApiConfig;
 import com.katya.quoterestapi.dto.AuthorDTO;
 import com.katya.quoterestapi.dto.QuoteDTO;
 import com.katya.quoterestapi.exception.ErrorResponse;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -39,6 +41,7 @@ import java.util.Map;
 @Slf4j
 @Validated
 @Tag(name = "Authors", description = "API for managing authors")
+@SecurityRequirement(name = OpenApiConfig.SECURITY_SCHEME_NAME)
 public class AuthorController {
 
     private final AuthorService authorService;

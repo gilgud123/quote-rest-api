@@ -40,11 +40,13 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${KEYCLOAK_ISSUER_URI:http://keycloak:8080/realms/quote}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://keycloak:8080/realms/quote/protocol/openid-connect/certs}
 
 app:
   security:
     keycloak:
       client-id: ${KEYCLOAK_CLIENT_ID:quote-api}
+      accepted-issuers: ${KEYCLOAK_ACCEPTED_ISSUERS:http://keycloak:8080/realms/quote,http://localhost:8081/realms/quote}
 
 # Server configuration
 server:
