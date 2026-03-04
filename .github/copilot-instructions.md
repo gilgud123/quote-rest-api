@@ -20,47 +20,47 @@ This project is a **Quote REST API** - a Spring Boot application for managing au
 - **Maven** for build and dependency management
 - **Testcontainers** for integration testing
 
-
 ## Anti-hallucination guidelines:
 
 Refer to anti-hallucination-guidelines.md and follow these guidelines at all times
 
 # When you need to call tools from the shell, use this rubric:
+
 - **Find Files:**  
   `fd`
 - **Find Text:**  
   `rg` (ripgrep)
 - **Find Code Structure (AST-based):** `ast-grep`
-    - For **Java**:
-        - `.java` ? `ast-grep --lang java -p '<pattern>'`
-    - For **XML**:
-        - `.xml` ? `ast-grep --lang xml -p '<pattern>'`
-    - For **Properties Files**:
-        - `.properties` ? `rg '<pattern>'` (text-based, since AST doesn�t apply here)
-    - For other languages, set `--lang` appropriately (e.g., `--lang rust`).
+  - For **Java**:
+    - `.java` ? `ast-grep --lang java -p '<pattern>'`
+  - For **XML**:
+    - `.xml` ? `ast-grep --lang xml -p '<pattern>'`
+  - For **Properties Files**:
+    - `.properties` ? `rg '<pattern>'` (text-based, since AST doesn�t apply here)
+  - For other languages, set `--lang` appropriately (e.g., `--lang rust`).
 - **Select among matches:**  
   Pipe to `fzf`
 - **Structured Data:**
-    - JSON: `jq`
-    - YAML/XML: `yq`
+  - JSON: `jq`
+  - YAML/XML: `yq`
 
 ## Technologies
 
-| Technology     | Version | Purpose                                      |
-|----------------|---------|----------------------------------------------|
-| Java           | 17      | Core language                                |
-| Spring Boot    | 3.2.1   | Application framework                        |
-| Spring Data JPA| (boot)  | Data access layer                            |
-| Hibernate      | (boot)  | ORM implementation                           |
-| PostgreSQL     | 12+     | Primary database                             |
-| H2             | (test)  | In-memory database for tests                 |
-| MapStruct      | 1.5.5   | DTO/Entity mapping                           |
-| Lombok         | 1.18.30 | Reduce boilerplate code                      |
-| Testcontainers | 1.19.3  | Integration testing with Docker              |
-| Keycloak       | latest  | OAuth2/JWT authentication server             |
-| Swagger/OpenAPI| 2.3.0   | API documentation                            |
-| JaCoCo         | 0.8.11  | Code coverage reporting                      |
-| Maven          | 3.6+    | Build tool and dependency management         |
+|   Technology    | Version |               Purpose                |
+|-----------------|---------|--------------------------------------|
+| Java            | 17      | Core language                        |
+| Spring Boot     | 3.2.1   | Application framework                |
+| Spring Data JPA | (boot)  | Data access layer                    |
+| Hibernate       | (boot)  | ORM implementation                   |
+| PostgreSQL      | 12+     | Primary database                     |
+| H2              | (test)  | In-memory database for tests         |
+| MapStruct       | 1.5.5   | DTO/Entity mapping                   |
+| Lombok          | 1.18.30 | Reduce boilerplate code              |
+| Testcontainers  | 1.19.3  | Integration testing with Docker      |
+| Keycloak        | latest  | OAuth2/JWT authentication server     |
+| Swagger/OpenAPI | 2.3.0   | API documentation                    |
+| JaCoCo          | 0.8.11  | Code coverage reporting              |
+| Maven           | 3.6+    | Build tool and dependency management |
 
 ## Project Structure
 
@@ -79,6 +79,7 @@ src/main/java/com/katya/quoterestapi/
 ---
 
 ## JPA/Hibernate Guidelines
+
 - Use **JPA annotations** (`@Entity`, `@Table`, `@Column`, `@Id`, `@GeneratedValue`) for entity mapping
 - Entities use Lombok annotations (`@Data`, `@Entity`, `@NoArgsConstructor`, `@AllArgsConstructor`)
 - Follow the existing entity structure in `Author.java` and `Quote.java`
@@ -106,16 +107,19 @@ src/main/java/com/katya/quoterestapi/
 ### Building and Running
 
 **Compile and test:**
+
 ```bash
 mvn clean install
 ```
 
 **Run the application:**
+
 ```bash
 mvn spring-boot:run
 ```
 
 **Run with Docker (includes PostgreSQL and Keycloak):**
+
 ```bash
 docker compose up --build
 ```
@@ -125,26 +129,31 @@ Refer to README.md for detailed instructions on Docker setup, Keycloak configura
 ## Running Tests
 
 **Run all tests:**
+
 ```bash
 mvn test
 ```
 
 **Run tests and skip compilation:**
+
 ```bash
 mvn test -DskipTests=false
 ```
 
 **Run a specific test class:**
+
 ```bash
 mvn test -Dtest=QuoteServiceTest
 ```
 
 **Run a specific test method:**
+
 ```bash
 mvn test -Dtest=QuoteServiceTest#testGetQuoteById
 ```
 
 **Generate JaCoCo coverage report:**
+
 ```bash
 mvn test
 # View report at: target/site/jacoco/index.html
@@ -167,6 +176,7 @@ mvn test
 - Use parameterized logging for performance: `log.info("Processing quote with ID: {}", quoteId)`
 - Log exceptions with context: `log.error("Failed to save quote: {}", quote.getId(), exception)`
 - Example usage:
+
   ```java
   @Slf4j
   @Service
@@ -203,12 +213,13 @@ mvn test
 - Test edge cases: null values, empty collections, invalid input
 - Use `@WebMvcTest` for controller tests, `@DataJpaTest` for repository tests
 - Example structure:
+
   ```java
   @ExtendWith(MockitoExtension.class)
   class QuoteServiceTest {
       @Mock private QuoteRepository quoteRepository;
       @InjectMocks private QuoteService quoteService;
-      
+
       @Test
       void testGetQuote_WhenExists_ReturnsQuote() {
           // given, when, then

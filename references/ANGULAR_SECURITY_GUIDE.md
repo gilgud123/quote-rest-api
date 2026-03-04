@@ -24,7 +24,7 @@ The resource server validates issuers:
 - **Docker profile:** accepts both:
   - `http://keycloak:8080/realms/quote` (internal Docker network)
   - `http://localhost:8081/realms/quote` (external access)
-  
+
 Configure via `app.security.keycloak.accepted-issuers` in application.yml
 
 ## 2) Keycloak client settings for SPA
