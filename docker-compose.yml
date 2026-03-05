@@ -40,6 +40,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: quotepass
       KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/quote
       KEYCLOAK_CLIENT_ID: quote-api
+      KEYCLOAK_ACCEPTED_ISSUERS: "http://keycloak:8080/realms/quote,http://localhost:8081/realms/quote"
       JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8787"
     ports:
       - "8080:8080"

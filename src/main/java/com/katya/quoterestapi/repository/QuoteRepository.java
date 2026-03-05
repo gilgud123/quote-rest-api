@@ -41,10 +41,15 @@ public interface QuoteRepository extends JpaRepository<Quote, Long> {
 
   /** Find quotes with multiple filters */
   @Query(
-      "SELECT q FROM Quote q WHERE "
-          + "(:authorId IS NULL OR q.author.id = :authorId) AND "
+      value = "SELECT * FROM quotes q WHERE "
+          + "(:authorId IS NULL OR q.author_id = :authorId) AND "
           + "(:category IS NULL OR LOWER(q.category) = LOWER(:category)) AND "
-          + "(:searchTerm IS NULL OR LOWER(q.text) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
+          + "(:searchTerm IS NULL OR LOWER(q.text) LIKE LOWER(CONCAT('%', :searchTerm, '%')))",
+      countQuery = "SELECT COUNT(*) FROM quotes q WHERE "
+          + "(:authorId IS NULL OR q.author_id = :authorId) AND "
+          + "(:category IS NULL OR LOWER(q.category) = LOWER(:category)) AND "
+          + "(:searchTerm IS NULL OR LOWER(q.text) LIKE LOWER(CONCAT('%', :searchTerm, '%')))",
+      nativeQuery = true)
   Page<Quote> findWithFilters(
       @Param("authorId") Long authorId,
       @Param("category") String category,

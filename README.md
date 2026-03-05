@@ -10,6 +10,8 @@ REST API for managing authors and their quotes. Built with Spring Boot, JPA, Pos
 - Swagger/OpenAPI docs
 - Unit and integration tests
 - JaCoCo coverage reporting
+- Code formatting with Spotless
+- MCP servers for AI-assisted development (Playwright & PostgreSQL)
 
 ## Tech Stack
 
@@ -93,6 +95,26 @@ mvn spotless:apply
 
 # Check formatting (runs automatically during verify phase)
 mvn spotless:check
+```
+
+## MCP Servers for AI Development
+
+This project includes configurations for **MCP (Model Context Protocol)** servers that extend Claude's capabilities:
+
+- **Playwright MCP**: Test REST API endpoints in browser
+- **PostgreSQL MCP**: Query and inspect database directly
+
+See [MCP_SETUP.md](tests/MCP_SETUP.md) for installation and usage guide.
+
+**Quick Start:**
+
+```powershell
+# 1. Start PostgreSQL
+docker-compose up -d postgres
+
+# 2. Configure Claude Desktop (see MCP_SETUP.md)
+
+# 3. Use Claude to test and inspect your API
 ```
 
 ## Notes

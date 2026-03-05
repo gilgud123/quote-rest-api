@@ -127,3 +127,6 @@ coverage/
 # Keep documentation files
 !*.md
 !README.md
+
+### Miscellaneous ###
+node_modules/
