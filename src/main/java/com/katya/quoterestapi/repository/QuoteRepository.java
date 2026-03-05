@@ -44,8 +44,7 @@ public interface QuoteRepository extends JpaRepository<Quote, Long> {
       value = "SELECT * FROM quotes q WHERE "
           + "(:authorId IS NULL OR q.author_id = :authorId) AND "
           + "(:category IS NULL OR LOWER(q.category) = LOWER(:category)) AND "
-          + "(:searchTerm IS NULL OR LOWER(q.text) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) "
-          + "ORDER BY q.created_at DESC",
+          + "(:searchTerm IS NULL OR LOWER(q.text) LIKE LOWER(CONCAT('%', :searchTerm, '%')))",
       countQuery = "SELECT COUNT(*) FROM quotes q WHERE "
           + "(:authorId IS NULL OR q.author_id = :authorId) AND "
           + "(:category IS NULL OR LOWER(q.category) = LOWER(:category)) AND "
