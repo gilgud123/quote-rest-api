@@ -4,7 +4,7 @@ This guide explains how to install and configure **Playwright** and **PostgreSQL
 
 ## What are MCP Servers?
 
-MCP servers extend Claude's capabilities by providing access to:
+MCP servers extend GitHub Copilot CLI's capabilities by providing access to:
 - **Playwright MCP**: Browser automation for testing web applications
 - **PostgreSQL MCP**: Direct database queries and inspection
 
