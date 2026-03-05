@@ -104,7 +104,7 @@ This project includes configurations for **MCP (Model Context Protocol)** server
 - **Playwright MCP**: Test REST API endpoints in browser
 - **PostgreSQL MCP**: Query and inspect database directly
 
-See [MCP_SETUP.md](MCP_SETUP.md) for installation and usage guide.
+See [MCP_SETUP.md](tests/MCP_SETUP.md) for installation and usage guide.
 
 **Quick Start:**
 

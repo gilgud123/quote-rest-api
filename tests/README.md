@@ -4,9 +4,9 @@ Automated browser-based API tests using Playwright for the Quote REST API.
 
 ## Prerequisites
 
-- Node.js 16+ installed
+- Node.js 18+ installed
 - Quote REST API running on `http://localhost:8080`
-- Keycloak running on `http://localhost:8181` (optional, for authentication tests)
+- Keycloak running on `http://localhost:8081` (optional, for authentication tests)
 
 ## Setup
 
@@ -18,9 +18,9 @@ Automated browser-based API tests using Playwright for the Quote REST API.
    ```
 
 2. Configure Keycloak (if testing with authentication):
-   - Realm: `quote-realm`
-   - Client: `quote-client`
-   - Test user: `testuser` / `testpass`
+   - Realm: `quote`
+   - Client: `quote-api`
+   - Test user: `api-admin` / `password`
 
 ## Running Tests
 

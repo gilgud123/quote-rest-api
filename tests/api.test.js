@@ -75,7 +75,7 @@ test.describe('Quote REST API - Author Endpoints', () => {
   });
 
   test('GET /authors - should return paginated authors', async () => {
-    const response = await apiContext.get('http://localhost:8080/api/v1/authors', {
+    const response = await apiContext.get(`${API_BASE}/authors`, {
       params: { page: 0, size: 10 },
       headers: getAuthHeaders()
     });
@@ -93,11 +93,10 @@ test.describe('Quote REST API - Author Endpoints', () => {
       name: `Test Author ${timestamp}`,
       birthYear: 1950,
       deathYear: 2020,
-      biography: 'Test biography for automated testing',
-      nationality: 'Test'
+      biography: 'Test biography for automated testing'
     };
 
-    const response = await apiContext.post('http://localhost:8080/api/v1/authors', {
+    const response = await apiContext.post(`${API_BASE}/authors`, {
       data: newAuthor,
       headers: getAuthHeaders()
     });
@@ -115,7 +114,7 @@ test.describe('Quote REST API - Author Endpoints', () => {
   test('GET /authors/{id} - should return specific author', async () => {
     if (!testAuthorId) test.skip();
 
-    const response = await apiContext.get(`http://localhost:8080/api/v1/authors/${testAuthorId}`, {
+    const response = await apiContext.get(`${API_BASE}/authors/${testAuthorId}`, {
       headers: getAuthHeaders()
     });
 
@@ -127,7 +126,7 @@ test.describe('Quote REST API - Author Endpoints', () => {
   });
 
   test('GET /authors/search - should search authors by name', async () => {
-    const response = await apiContext.get('http://localhost:8080/api/v1/authors/search', {
+    const response = await apiContext.get(`${API_BASE}/authors/search`, {
       params: { name: 'Plato', page: 0, size: 10 },
       headers: getAuthHeaders()
     });
@@ -139,7 +138,7 @@ test.describe('Quote REST API - Author Endpoints', () => {
   });
 
   test('GET /authors/filter - should filter authors by birth year', async () => {
-    const response = await apiContext.get('http://localhost:8080/api/v1/authors/filter', {
+    const response = await apiContext.get(`${API_BASE}/authors/filter`, {
       params: { birthYear: 1564, page: 0, size: 10 },
       headers: getAuthHeaders()
     });
@@ -154,7 +153,7 @@ test.describe('Quote REST API - Author Endpoints', () => {
   test('GET /authors/{id}/stats - should return author statistics', async () => {
     if (!testAuthorId) test.skip();
 
-    const response = await apiContext.get(`http://localhost:8080/api/v1/authors/${testAuthorId}/stats`, {
+    const response = await apiContext.get(`${API_BASE}/authors/${testAuthorId}/stats`, {
       headers: getAuthHeaders()
     });
 
@@ -173,11 +172,10 @@ test.describe('Quote REST API - Author Endpoints', () => {
       name: `Updated Author ${timestamp}`,
       birthYear: 1965,
       deathYear: 2025,
-      biography: 'Updated biography for testing',
-      nationality: 'Updated'
+      biography: 'Updated biography for testing'
     };
 
-    const response = await apiContext.put(`http://localhost:8080/api/v1/authors/${testAuthorId}`, {
+    const response = await apiContext.put(`${API_BASE}/authors/${testAuthorId}`, {
       data: updatedAuthor,
       headers: getAuthHeaders()
     });
@@ -195,7 +193,7 @@ test.describe('Quote REST API - Author Endpoints', () => {
       biography: 'Partially updated biography'
     };
 
-    const response = await apiContext.patch(`http://localhost:8080/api/v1/authors/${testAuthorId}`, {
+    const response = await apiContext.patch(`${API_BASE}/authors/${testAuthorId}`, {
       data: partialUpdate,
       headers: getAuthHeaders()
     });
@@ -225,7 +223,7 @@ test.describe('Quote REST API - Quote Endpoints', () => {
   });
 
   test('GET /quotes - should return paginated quotes', async () => {
-    const response = await apiContext.get('http://localhost:8080/api/v1/quotes', {
+    const response = await apiContext.get(`${API_BASE}/quotes`, {
       params: { page: 0, size: 10, sortBy: 'createdAt', direction: 'DESC' },
       headers: getAuthHeaders()
     });
@@ -248,7 +246,7 @@ test.describe('Quote REST API - Quote Endpoints', () => {
       authorId: testAuthorId
     };
 
-    const response = await apiContext.post('http://localhost:8080/api/v1/quotes', {
+    const response = await apiContext.post(`${API_BASE}/quotes`, {
       data: newQuote,
       headers: getAuthHeaders()
     });
@@ -266,7 +264,7 @@ test.describe('Quote REST API - Quote Endpoints', () => {
   test('GET /quotes/{id} - should return specific quote', async () => {
     if (!testQuoteId) test.skip();
 
-    const response = await apiContext.get(`http://localhost:8080/api/v1/quotes/${testQuoteId}`, {
+    const response = await apiContext.get(`${API_BASE}/quotes/${testQuoteId}`, {
       headers: getAuthHeaders()
     });
 
@@ -277,7 +275,7 @@ test.describe('Quote REST API - Quote Endpoints', () => {
   });
 
   test('GET /quotes/search - should search quotes by text', async () => {
-    const response = await apiContext.get('http://localhost:8080/api/v1/quotes/search', {
+    const response = await apiContext.get(`${API_BASE}/quotes/search`, {
       params: { text: 'be', page: 0, size: 10 },
       headers: getAuthHeaders()
     });
@@ -288,7 +286,7 @@ test.describe('Quote REST API - Quote Endpoints', () => {
   });
 
   test('GET /quotes/search - should search quotes by author', async () => {
-    const response = await apiContext.get('http://localhost:8080/api/v1/quotes/search', {
+    const response = await apiContext.get(`${API_BASE}/quotes/search`, {
       params: { author: 'Shakespeare', page: 0, size: 10 },
       headers: getAuthHeaders()
     });
@@ -299,7 +297,7 @@ test.describe('Quote REST API - Quote Endpoints', () => {
   });
 
   test('GET /quotes/search - should search with general query', async () => {
-    const response = await apiContext.get('http://localhost:8080/api/v1/quotes/search', {
+    const response = await apiContext.get(`${API_BASE}/quotes/search`, {
       params: { q: 'question', page: 0, size: 10 },
       headers: getAuthHeaders()
     });
@@ -313,7 +311,7 @@ test.describe('Quote REST API - Quote Endpoints', () => {
     // KNOWN BUG: PostgreSQL JDBC driver interprets String parameters as bytea in some cases
     // Error: "function lower(bytea) does not exist"
     // This is a Hibernate/PostgreSQL compatibility issue with parameter binding
-    const response = await apiContext.get('http://localhost:8080/api/v1/quotes/filter', {
+    const response = await apiContext.get(`${API_BASE}/quotes/filter`, {
       params: { category: 'Philosophy', page: 0, size: 10 },
       headers: getAuthHeaders()
     });
@@ -329,7 +327,7 @@ test.describe('Quote REST API - Quote Endpoints', () => {
     // KNOWN BUG: Same PostgreSQL bytea issue as category filter
     if (!testAuthorId) test.skip();
 
-    const response = await apiContext.get('http://localhost:8080/api/v1/quotes/filter', {
+    const response = await apiContext.get(`${API_BASE}/quotes/filter`, {
       params: { authorId: testAuthorId, page: 0, size: 10 },
       headers: getAuthHeaders()
     });
@@ -340,7 +338,7 @@ test.describe('Quote REST API - Quote Endpoints', () => {
   });
 
   test('GET /quotes/categories - should return all categories', async () => {
-    const response = await apiContext.get('http://localhost:8080/api/v1/quotes/categories', {
+    const response = await apiContext.get(`${API_BASE}/quotes/categories`, {
       headers: getAuthHeaders()
     });
 
@@ -358,7 +356,7 @@ test.describe('Quote REST API - Quote Endpoints', () => {
       authorId: testAuthorId
     };
 
-    const response = await apiContext.put(`http://localhost:8080/api/v1/quotes/${testQuoteId}`, {
+    const response = await apiContext.put(`${API_BASE}/quotes/${testQuoteId}`, {
       data: updatedQuote,
       headers: getAuthHeaders()
     });
@@ -376,7 +374,7 @@ test.describe('Quote REST API - Quote Endpoints', () => {
       category: 'Literature'
     };
 
-    const response = await apiContext.patch(`http://localhost:8080/api/v1/quotes/${testQuoteId}`, {
+    const response = await apiContext.patch(`${API_BASE}/quotes/${testQuoteId}`, {
       data: partialUpdate,
       headers: getAuthHeaders()
     });
@@ -389,7 +387,7 @@ test.describe('Quote REST API - Quote Endpoints', () => {
   test('GET /authors/{id}/quotes - should return quotes by author', async () => {
     if (!testAuthorId) test.skip();
 
-    const response = await apiContext.get(`http://localhost:8080/api/v1/authors/${testAuthorId}/quotes`, {
+    const response = await apiContext.get(`${API_BASE}/authors/${testAuthorId}/quotes`, {
       params: { page: 0, size: 10 },
       headers: getAuthHeaders()
     });
@@ -419,7 +417,7 @@ test.describe('Quote REST API - Error Handling', () => {
   });
 
   test('GET /authors/{id} - should return 404 for non-existent author', async () => {
-    const response = await apiContext.get('http://localhost:8080/api/v1/authors/999999', {
+    const response = await apiContext.get(`${API_BASE}/authors/999999`, {
       headers: getAuthHeaders()
     });
 
@@ -429,7 +427,7 @@ test.describe('Quote REST API - Error Handling', () => {
   });
 
   test('GET /quotes/{id} - should return 404 for non-existent quote', async () => {
-    const response = await apiContext.get('http://localhost:8080/api/v1/quotes/999999', {
+    const response = await apiContext.get(`${API_BASE}/quotes/999999`, {
       headers: getAuthHeaders()
     });
 
@@ -444,7 +442,7 @@ test.describe('Quote REST API - Error Handling', () => {
       birthYear: 3000 // Future year
     };
 
-    const response = await apiContext.post('http://localhost:8080/api/v1/authors', {
+    const response = await apiContext.post(`${API_BASE}/authors`, {
       data: invalidAuthor,
       headers: getAuthHeaders()
     });
@@ -457,7 +455,7 @@ test.describe('Quote REST API - Error Handling', () => {
       text: '' // Empty text
     };
 
-    const response = await apiContext.post('http://localhost:8080/api/v1/quotes', {
+    const response = await apiContext.post(`${API_BASE}/quotes`, {
       data: invalidQuote,
       headers: getAuthHeaders()
     });
@@ -472,7 +470,7 @@ test.describe('Quote REST API - Error Handling', () => {
       authorId: 999999
     };
 
-    const response = await apiContext.post('http://localhost:8080/api/v1/quotes', {
+    const response = await apiContext.post(`${API_BASE}/quotes`, {
       data: quoteWithInvalidAuthor,
       headers: getAuthHeaders()
     });
@@ -502,7 +500,7 @@ test.describe('Quote REST API - Cleanup', () => {
   test('DELETE /quotes/{id} - should delete quote', async () => {
     if (!testQuoteId) test.skip();
 
-    const response = await apiContext.delete(`http://localhost:8080/api/v1/quotes/${testQuoteId}`, {
+    const response = await apiContext.delete(`${API_BASE}/quotes/${testQuoteId}`, {
       headers: getAuthHeaders()
     });
 
@@ -513,7 +511,7 @@ test.describe('Quote REST API - Cleanup', () => {
   test('DELETE /authors/{id} - should delete author', async () => {
     if (!testAuthorId) test.skip();
 
-    const response = await apiContext.delete(`http://localhost:8080/api/v1/authors/${testAuthorId}`, {
+    const response = await apiContext.delete(`${API_BASE}/authors/${testAuthorId}`, {
       headers: getAuthHeaders()
     });
 
