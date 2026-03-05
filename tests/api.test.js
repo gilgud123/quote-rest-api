@@ -1,11 +1,9 @@
-const { test, expect, request } = require('@playwright/test');
+const { test, expect } = require('@playwright/test');
 
 const BASE_URL = 'http://localhost:8080';
 const API_BASE = `${BASE_URL}/api/v1`;
 
-// Test data
-let testAuthorId;
-let testQuoteId;
+// Shared auth token
 let authToken = null;
 
 /**
@@ -50,8 +48,24 @@ function getAuthHeaders() {
   return authToken ? { Authorization: `Bearer ${authToken}` } : {};
 }
 
+/**
+ * Global setup - fetch auth token once for all tests
+ */
+test.beforeAll(async ({ playwright }) => {
+  const tempContext = await playwright.request.newContext();
+  authToken = await getAuthToken(tempContext);
+  await tempContext.dispose();
+  
+  if (authToken) {
+    console.log('✓ Authentication successful - token will be reused for all tests');
+  } else {
+    console.warn('⚠ Running tests without authentication - some may fail');
+  }
+});
+
 test.describe('Quote REST API - Author Endpoints', () => {
   let apiContext;
+  let testAuthorId;
 
   test.beforeAll(async ({ playwright }) => {
     apiContext = await playwright.request.newContext({
@@ -60,17 +74,20 @@ test.describe('Quote REST API - Author Endpoints', () => {
         'Content-Type': 'application/json'
       }
     });
-    
-    // Try to get auth token
-    authToken = await getAuthToken(apiContext);
-    if (authToken) {
-      console.log('✓ Authentication successful');
-    } else {
-      console.warn('⚠ Running tests without authentication - some may fail');
-    }
   });
 
   test.afterAll(async () => {
+    // Cleanup test author if it was created
+    if (testAuthorId) {
+      try {
+        await apiContext.delete(`${API_BASE}/authors/${testAuthorId}`, {
+          headers: getAuthHeaders()
+        });
+        console.log(`✓ Cleaned up test author ID: ${testAuthorId}`);
+      } catch (error) {
+        console.warn(`Failed to cleanup test author ${testAuthorId}:`, error.message);
+      }
+    }
     await apiContext.dispose();
   });
 
@@ -206,6 +223,8 @@ test.describe('Quote REST API - Author Endpoints', () => {
 
 test.describe('Quote REST API - Quote Endpoints', () => {
   let apiContext;
+  let testAuthorId;
+  let testQuoteId;
 
   test.beforeAll(async ({ playwright }) => {
     apiContext = await playwright.request.newContext({
@@ -214,11 +233,56 @@ test.describe('Quote REST API - Quote Endpoints', () => {
         'Content-Type': 'application/json'
       }
     });
-    
-    authToken = await getAuthToken(apiContext);
+
+    // Create a test author for quote tests
+    const timestamp = Date.now();
+    const newAuthor = {
+      name: `Test Author for Quotes ${timestamp}`,
+      birthYear: 1950,
+      deathYear: 2020,
+      biography: 'Test author for quote endpoint testing'
+    };
+
+    try {
+      const response = await apiContext.post(`${API_BASE}/authors`, {
+        data: newAuthor,
+        headers: getAuthHeaders()
+      });
+      if (response.ok()) {
+        const data = await response.json();
+        testAuthorId = data.id;
+        console.log(`✓ Created test author for quote tests: ${testAuthorId}`);
+      }
+    } catch (error) {
+      console.warn('Failed to create test author for quote tests:', error.message);
+    }
   });
 
   test.afterAll(async () => {
+    // Cleanup test quote if it was created
+    if (testQuoteId) {
+      try {
+        await apiContext.delete(`${API_BASE}/quotes/${testQuoteId}`, {
+          headers: getAuthHeaders()
+        });
+        console.log(`✓ Cleaned up test quote ID: ${testQuoteId}`);
+      } catch (error) {
+        console.warn(`Failed to cleanup test quote ${testQuoteId}:`, error.message);
+      }
+    }
+    
+    // Cleanup test author
+    if (testAuthorId) {
+      try {
+        await apiContext.delete(`${API_BASE}/authors/${testAuthorId}`, {
+          headers: getAuthHeaders()
+        });
+        console.log(`✓ Cleaned up test author ID: ${testAuthorId}`);
+      } catch (error) {
+        console.warn(`Failed to cleanup test author ${testAuthorId}:`, error.message);
+      }
+    }
+    
     await apiContext.dispose();
   });
 
@@ -408,8 +472,6 @@ test.describe('Quote REST API - Error Handling', () => {
         'Content-Type': 'application/json'
       }
     });
-    
-    authToken = await getAuthToken(apiContext);
   });
 
   test.afterAll(async () => {
@@ -479,8 +541,10 @@ test.describe('Quote REST API - Error Handling', () => {
   });
 });
 
-test.describe('Quote REST API - Cleanup', () => {
+test.describe('Quote REST API - Deletion', () => {
   let apiContext;
+  let testAuthorId;
+  let testQuoteId;
 
   test.beforeAll(async ({ playwright }) => {
     apiContext = await playwright.request.newContext({
@@ -489,8 +553,46 @@ test.describe('Quote REST API - Cleanup', () => {
         'Content-Type': 'application/json'
       }
     });
-    
-    authToken = await getAuthToken(apiContext);
+
+    // Create test data for deletion tests
+    const timestamp = Date.now();
+    const newAuthor = {
+      name: `Test Author for Deletion ${timestamp}`,
+      birthYear: 1950,
+      deathYear: 2020,
+      biography: 'Test author for deletion testing'
+    };
+
+    try {
+      const authorResponse = await apiContext.post(`${API_BASE}/authors`, {
+        data: newAuthor,
+        headers: getAuthHeaders()
+      });
+      if (authorResponse.ok()) {
+        const authorData = await authorResponse.json();
+        testAuthorId = authorData.id;
+        console.log(`✓ Created test author for deletion tests: ${testAuthorId}`);
+
+        // Create a quote for this author
+        const newQuote = {
+          text: 'Test quote for deletion',
+          category: 'Test',
+          authorId: testAuthorId
+        };
+
+        const quoteResponse = await apiContext.post(`${API_BASE}/quotes`, {
+          data: newQuote,
+          headers: getAuthHeaders()
+        });
+        if (quoteResponse.ok()) {
+          const quoteData = await quoteResponse.json();
+          testQuoteId = quoteData.id;
+          console.log(`✓ Created test quote for deletion tests: ${testQuoteId}`);
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to create test data for deletion tests:', error.message);
+    }
   });
 
   test.afterAll(async () => {
@@ -498,7 +600,10 @@ test.describe('Quote REST API - Cleanup', () => {
   });
 
   test('DELETE /quotes/{id} - should delete quote', async () => {
-    if (!testQuoteId) test.skip();
+    if (!testQuoteId) {
+      console.warn('Skipping - no test quote available for deletion test');
+      test.skip();
+    }
 
     const response = await apiContext.delete(`${API_BASE}/quotes/${testQuoteId}`, {
       headers: getAuthHeaders()
@@ -509,7 +614,10 @@ test.describe('Quote REST API - Cleanup', () => {
   });
 
   test('DELETE /authors/{id} - should delete author', async () => {
-    if (!testAuthorId) test.skip();
+    if (!testAuthorId) {
+      console.warn('Skipping - no test author available for deletion test');
+      test.skip();
+    }
 
     const response = await apiContext.delete(`${API_BASE}/authors/${testAuthorId}`, {
       headers: getAuthHeaders()

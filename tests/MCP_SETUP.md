@@ -145,9 +145,7 @@ Order by quote count descending
 - Password: `quotepass`
 - Connection String: `postgresql://quoteuser:quotepass@localhost:5432/quotedb`
 
-**Local PostgreSQL:**
-
-If using local PostgreSQL instead of Docker, update the connection string in `claude_desktop_config.json`:
+**If using local PostgreSQL instead of Docker, update the connection string in the config file:**
 
 ```json
 "postgresql://postgres:postgres@localhost:5432/quotedb"
@@ -188,18 +186,18 @@ If using local PostgreSQL instead of Docker, update the connection string in `cl
 
 ### Check MCP Servers are Running
 
-In Claude Desktop, you should see indicators that MCP servers are connected (usually shown in the UI).
+The MCP servers should be automatically detected by GitHub Copilot CLI when properly configured.
 
 ### Test Playwright
 
 ```
-Ask Claude: "Use Playwright to navigate to https://google.com and tell me the page title"
+Ask Copilot: "Use Playwright to navigate to https://google.com and tell me the page title"
 ```
 
 ### Test PostgreSQL
 
 ```
-Ask Claude: "Query the PostgreSQL database and count the rows in the authors table"
+Ask Copilot: "Query the PostgreSQL database and count the rows in the authors table"
 ```
 
 ## Troubleshooting
@@ -413,7 +411,7 @@ LIMIT 10;
 
 **Need Help?**
 
-- Check Claude Desktop logs for MCP server errors
+- Check the MCP server logs for any errors
 - Verify PostgreSQL is running: `docker ps`
 - Test Node.js/npx: `node --version` and `npx --version`
 - Refer to troubleshooting section above
