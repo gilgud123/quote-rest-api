@@ -71,7 +71,7 @@ npm run test:report
 - ✅ PATCH `/api/v1/quotes/{id}` - Update quote (partial)
 - ✅ DELETE `/api/v1/quotes/{id}` - Delete quote
 - ✅ GET `/api/v1/quotes/search` - Search quotes (by text, author, or general query)
-- ✅ GET `/api/v1/quotes/filter` - Filter quotes (by category, author ID)
+- GET `/api/v1/quotes/filter` - Filter quotes (by category, author ID) — tests currently skipped/disabled in `api.test.js`
 - ✅ GET `/api/v1/quotes/categories` - Get all categories
 
 ### Error Handling
