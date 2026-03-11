@@ -142,7 +142,7 @@ pipeline {
                 script {
                     // Start PostgreSQL, Keycloak, and the application
                     sh '''
-                        cd $WORKSPACE
+                        cd "$WORKSPACE"
                         docker compose up -d postgres keycloak
                     '''
                     
