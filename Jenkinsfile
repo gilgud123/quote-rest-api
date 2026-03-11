@@ -5,13 +5,15 @@ pipeline {
     agent {
         docker {
             image 'maven:3.9-eclipse-temurin-17'
-            args '-v /var/run/docker.sock:/var/run/docker.sock -v maven-repo:/root/.m2'
+            args '-v /var/run/docker.sock:/var/run/docker.sock -v maven-repo:/root/.m2 -u root'
+            // Note: Docker CLI must be installed in the Maven container for docker compose commands
+            // Alternative: Use 'any' agent and install Maven, or create custom image with both
         }
     }
 
     environment {
-        // Maven options
-        MAVEN_OPTS = '-Xmx1024m -XX:MaxPermSize=512m'
+        // Maven options (MaxPermSize removed - not needed in Java 17+)
+        MAVEN_OPTS = '-Xmx1024m'
         MAVEN_CLI_OPTS = '--batch-mode --errors --fail-at-end --show-version'
         
         // Docker image settings
@@ -133,6 +135,7 @@ pipeline {
         }
 
         stage('Start Services for E2E Tests') {
+            agent any  // Run on Jenkins agent which has Docker
             steps {
                 echo '🚀 Starting services for Playwright tests...'
                 script {
@@ -191,13 +194,19 @@ pipeline {
                     archiveArtifacts artifacts: 'tests/test-results/**', allowEmptyArchive: true
                 }
                 cleanup {
-                    // Stop services after Playwright tests
-                    sh 'docker compose down || true'
+                    script {
+                        // Run cleanup on Jenkins agent which has Docker
+                        node('any') {
+                            // Stop services after Playwright tests
+                            sh 'docker compose down || true'
+                        }
+                    }
                 }
             }
         }
 
         stage('Docker Build') {
+            agent any  // Run on Jenkins agent which has Docker
             steps {
                 echo '🐳 Building Docker image...'
                 script {
@@ -217,9 +226,14 @@ pipeline {
 
     post {
         always {
-            echo '🧹 Cleaning up...'
-            // Stop all Docker Compose services
-            sh 'docker compose down || true'
+            script {
+                // Run cleanup on Jenkins agent which has Docker
+                node('any') {
+                    echo '🧹 Cleaning up...'
+                    // Stop all Docker Compose services
+                    sh 'docker compose down || true'
+                }
+            }
             
             // Clean up workspace (optional)
             cleanWs(
