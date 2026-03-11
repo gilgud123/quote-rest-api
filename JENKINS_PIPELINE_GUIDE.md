@@ -59,8 +59,9 @@ Choose one or both:
    - **Credentials**: Select "- none -" for public repos, or add credentials for private repos
 4. **Branches to build**:
    - Branch Specifier (blank for 'any'): `*/main` (or `*/master`)
+   - **Important**: If using Git Parameter (see below), change this to `${BRANCH_NAME}`
 5. **Repository browser**: (Auto)
-6. **Script Path**: `Jenkinsfile`
+6. **Script Path**: `Jenkinsfile` (case-sensitive - must match filename exactly)
 
 **Advanced Options** (click to expand if needed):
 - **Lightweight checkout**: ✅ Checked (faster, recommended)
@@ -81,10 +82,44 @@ In the **General** section:
 
 Common parameter types:
 
-**String Parameter** (for branch names, versions, etc.):
+**Git Parameter** (for branch selection - recommended):
+- **Requires Plugin**: Install "Git Parameter" plugin first (see instructions below)
+- Parameter Type: `Branch or Tag`
+- Name: `BRANCH_NAME`
+- Default Value: `origin/jenkins-setup` (or your default branch)
+- Description: `Git branch to build`
+- Branch Filter: (leave blank for all branches)
+- **Advanced Options** (expand):
+  - Tag Filter: (leave blank)
+  - Sort Mode: `DESCENDING_SMART` (optional - shows recent branches first)
+  - Selected Value: `TOP` (uses default value)
+  - **Branch Filter**: `origin/.*` (important - filters to show only remote branches)
+
+**Important Configuration**:
+- Parameter Type MUST be `Branch or Tag` (NOT just "Branch")
+- Branch Filter helps show only remote branches from origin
+- Default value should include `origin/` prefix (e.g., `origin/jenkins-setup`)
+
+**Installing Git Parameter Plugin:**
+1. Go to **Manage Jenkins** (left sidebar)
+2. Click **Plugins**
+3. Click **Available plugins** tab
+4. Search for: `Git Parameter`
+5. Check the box next to "Git Parameter"
+6. Click **Install**
+7. After installation, restart Jenkins: **Manage Jenkins** → **Restart Safely**
+8. Return to your job configuration and add the Git Parameter
+
+**Alternative: String Parameter** (if you don't want to install the plugin):
 - Name: `BRANCH_NAME`
 - Default Value: `main`
-- Description: `Git branch to build`
+- Description: `Git branch to build (e.g., main, develop, feature/xyz)`
+- **Note**: User must type branch name manually
+
+**String Parameter** (for versions, tags, custom values):
+- Name: `VERSION`
+- Default Value: `1.0.0`
+- Description: `Application version number`
 
 **Choice Parameter** (dropdown selection):
 - Name: `ENVIRONMENT`
@@ -103,19 +138,44 @@ Common parameter types:
 
 **Step 3: Use Parameters in Pipeline**
 
-To use the branch parameter, update your **Branches to build** in Pipeline Configuration:
-- Branch Specifier: `*/${BRANCH_NAME}` (instead of `*/main`)
+**IMPORTANT: Update Branch Specifier**
 
-The parameter will now appear when you click **Build with Parameters**.
+After adding the BRANCH_NAME parameter, you MUST update the Pipeline configuration:
+
+1. Scroll to **Pipeline** section → **Branches to build**
+2. Update **Branch Specifier** based on parameter type:
+
+**If using Git Parameter with "Branch or Tag" type:**
+- Branch Specifier: `${BRANCH_NAME}`
+- The parameter returns the full reference (e.g., `origin/jenkins-setup`)
+- Jenkins will correctly resolve this to `refs/remotes/origin/jenkins-setup`
+
+**If using String Parameter:**
+- Branch Specifier: `*/${BRANCH_NAME}`
+- User must type branch name without "origin/" prefix (e.g., just `jenkins-setup`)
+- Jenkins will expand this to `*/jenkins-setup` matching any remote
+
+3. Click **Save**
+
+**Testing the Configuration:**
+- Click **Build with Parameters**
+- Select your branch from the dropdown (e.g., `origin/jenkins-setup`)
+- Click **Build**
+- If you get "couldn't find remote ref" error, verify the Branch Specifier is exactly `${BRANCH_NAME}`
 
 **Example: Multiple Parameters**
 
 You can add several parameters for flexible builds:
 
-1. **BRANCH_NAME** (String): `main` - Branch to build
+1. **BRANCH_NAME** (Git Parameter - Branch): `origin/main` - Branch to build
 2. **SKIP_TESTS** (Boolean): unchecked - Skip test execution
 3. **DOCKER_TAG** (String): `latest` - Docker image tag
 4. **DEPLOY** (Boolean): unchecked - Deploy after build
+
+**Note**: If you don't see "Git Parameter" in the parameter types:
+1. The "Git Parameter" plugin is not installed
+2. Follow the installation steps in Step 2 above
+3. You can use a String Parameter as an alternative (user types branch name manually)
 
 **Using Parameters in Jenkinsfile**
 
@@ -306,6 +366,59 @@ post {
 
 ## Troubleshooting
 
+### ERROR: Unable to find Jenkinsfile from git
+
+**Problem**: Build fails with "Unable to find Jenkinsfile from git [repository-url]"
+
+**Common Causes & Solutions**:
+
+1. **Branch Specifier is incorrect when using Git Parameter**
+   - Go to job → **Configure** → **Pipeline** section
+   - Check **Branches to build** → **Branch Specifier**
+   - If using Git Parameter, it MUST be: `${BRANCH_NAME}` (not `*/${BRANCH_NAME}`)
+   - Click **Save**
+
+2. **Jenkinsfile doesn't exist in the selected branch**
+   - Verify which branch contains the Jenkinsfile:
+     ```bash
+     git ls-tree -r --name-only origin/main | grep Jenkinsfile
+     git ls-tree -r --name-only origin/master | grep Jenkinsfile
+     ```
+   - Update Branch Specifier to the correct branch
+   - Or merge Jenkinsfile to your main branch
+
+3. **Wrong Script Path**
+   - Script Path is case-sensitive
+   - Default should be: `Jenkinsfile` (capital J)
+   - Check if your file is named differently: `jenkinsfile`, `Jenkinsfile.groovy`, etc.
+   - Update **Script Path** to match exact filename
+
+4. **Default branch name mismatch**
+   - Check repository default branch: `git remote show origin`
+   - Update Branch Specifier to match (e.g., `*/master` instead of `*/main`)
+
+### ERROR: couldn't find remote ref refs/heads/origin/[branch]
+
+**Problem**: Build fails with "fatal: couldn't find remote ref refs/heads/origin/jenkins-setup"
+
+**Cause**: Git Parameter is misconfigured, causing Jenkins to look for the wrong branch reference.
+
+**Solution**:
+1. Go to job → **Configure** → **General** section
+2. Find the **BRANCH_NAME** parameter
+3. Verify these settings:
+   - Parameter Type: `Branch or Tag` (NOT just "Branch")
+   - Default Value: `origin/jenkins-setup` (include origin/ prefix)
+   - Branch Filter: `origin/.*` (optional but helpful)
+4. Go to **Pipeline** section
+5. Branch Specifier should be: `${BRANCH_NAME}` (exactly as shown)
+6. Click **Save** and rebuild
+
+**If still failing**:
+- Try using a fixed branch first: Set Branch Specifier to `*/jenkins-setup`
+- Click **Build Now** (without parameters)
+- If that works, the Git Parameter configuration needs adjustment
+
 ### Build Fails at "Checkout" Stage
 
 **Problem**: Can't clone repository
@@ -359,6 +472,29 @@ docker system prune -f
 - Ensure Docker socket is mounted in Jenkins
 - Check Dockerfile exists and is valid
 - Verify disk space: `docker system df`
+
+### docker-compose: not found
+
+**Problem**: Build fails with "docker-compose: not found"
+
+**Solution**:
+The Jenkinsfile has been updated to use `docker compose` (v2 syntax) instead of `docker-compose` (v1).
+
+If you're using an older Jenkinsfile:
+1. Replace all instances of `docker-compose` with `docker compose` (note the space)
+2. This is the modern Docker Compose v2 command that's built into Docker
+3. No separate docker-compose installation needed
+
+**Changes made in Jenkinsfile**:
+```groovy
+// Old (v1)
+sh 'docker-compose up -d'
+sh 'docker-compose down'
+
+// New (v2)
+sh 'docker compose up -d'
+sh 'docker compose down'
+```
 
 ### Pipeline Hangs
 

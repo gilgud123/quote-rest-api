@@ -139,7 +139,7 @@ pipeline {
                     // Start PostgreSQL, Keycloak, and the application
                     sh '''
                         cd $WORKSPACE
-                        docker-compose up -d postgres keycloak
+                        docker compose up -d postgres keycloak
                     '''
                     
                     // Wait for services to be ready
@@ -150,7 +150,7 @@ pipeline {
                     
                     // Start the application
                     sh '''
-                        docker-compose up -d app
+                        docker compose up -d app
                         ./scripts/jenkins/wait-for-services.sh app
                     '''
                 }
@@ -192,7 +192,7 @@ pipeline {
                 }
                 cleanup {
                     // Stop services after Playwright tests
-                    sh 'docker-compose down || true'
+                    sh 'docker compose down || true'
                 }
             }
         }
@@ -219,7 +219,7 @@ pipeline {
         always {
             echo '🧹 Cleaning up...'
             // Stop all Docker Compose services
-            sh 'docker-compose down || true'
+            sh 'docker compose down || true'
             
             // Clean up workspace (optional)
             cleanWs(

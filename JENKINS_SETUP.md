@@ -140,6 +140,9 @@ Search for and install the following plugins:
 - ✅ **HTML Publisher Plugin** - Publish HTML reports
 - ✅ **Test Results Analyzer Plugin** - Detailed test analysis
 
+#### Build Parameters
+- ✅ **Git Parameter Plugin** - Allow users to select Git branches/tags as build parameters
+
 #### Optional but Recommended
 - ✅ **Blue Ocean** - Modern Jenkins UI
 - ✅ **Timestamper Plugin** - Timestamps in console output
