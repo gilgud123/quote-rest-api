@@ -136,7 +136,6 @@ pipeline {
         }
 
         stage('Start Services for E2E Tests') {
-            agent { label 'built-in' }  // Run on Jenkins controller which has Docker
             steps {
                 echo '🚀 Starting services for Playwright tests...'
                 script {
@@ -196,18 +195,14 @@ pipeline {
                 }
                 cleanup {
                     script {
-                        // Run cleanup on Jenkins controller which has Docker
-                        node('built-in') {
-                            // Stop services after Playwright tests
-                            sh 'docker compose down || true'
-                        }
+                        // Stop services after Playwright tests
+                        sh 'docker compose down || true'
                     }
                 }
             }
         }
 
         stage('Docker Build') {
-            agent { label 'built-in' }  // Run on Jenkins controller which has Docker
             steps {
                 echo '🐳 Building Docker image...'
                 script {
@@ -228,12 +223,9 @@ pipeline {
     post {
         always {
             script {
-                // Run cleanup on Jenkins controller which has Docker
-                node('built-in') {
-                    echo '🧹 Cleaning up...'
-                    // Stop all Docker Compose services
-                    sh 'docker compose down || true'
-                }
+                echo '🧹 Cleaning up...'
+                // Stop all Docker Compose services
+                sh 'docker compose down || true'
             }
             
             // Clean up workspace (optional)
