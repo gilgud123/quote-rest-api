@@ -87,7 +87,8 @@ pipeline {
                 sh """
                     mvn ${MAVEN_CLI_OPTS} verify \
                         -DskipUnitTests=true \
-                        -Dtest=*IntegrationTest
+                        -Dtest=*IntegrationTest \
+                        -Dsurefire.failIfNoSpecifiedTests=false
                 """
             }
             post {
