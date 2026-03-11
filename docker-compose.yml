@@ -95,12 +95,12 @@ services:
     environment:
       DOCKER_HOST: unix:///var/run/docker.sock
     ports:
-      - "8090:8080"  # Jenkins web UI
-      - "50000:50000"  # Jenkins agent port
+      - "8090:8080" # Jenkins web UI
+      - "50000:50000" # Jenkins agent port
     volumes:
       - jenkins-data:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock  # Docker-in-Docker
-      - ./:/workspace  # Mount project directory
+      - /var/run/docker.sock:/var/run/docker.sock # Docker-in-Docker
+      - ./:/workspace # Mount project directory
     networks:
       - quote-network
     restart: unless-stopped
