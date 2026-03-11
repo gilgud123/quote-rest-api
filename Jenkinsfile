@@ -38,6 +38,29 @@ pipeline {
     }
 
     stages {
+        stage('Setup') {
+            steps {
+                echo '⚙️ Setting up environment...'
+                sh '''
+                    # Install Docker CLI if not present
+                    if ! command -v docker &> /dev/null; then
+                        echo "Installing Docker CLI..."
+                        apt-get update -qq
+                        apt-get install -y -qq ca-certificates curl
+                        install -m 0755 -d /etc/apt/keyrings
+                        curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+                        chmod a+r /etc/apt/keyrings/docker.asc
+                        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian bookworm stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+                        apt-get update -qq
+                        apt-get install -y -qq docker-ce-cli docker-compose-plugin
+                        echo "Docker CLI installed successfully"
+                    else
+                        echo "Docker CLI already installed"
+                    fi
+                '''
+            }
+        }
+        
         stage('Checkout') {
             steps {
                 echo '📦 Checking out source code...'
