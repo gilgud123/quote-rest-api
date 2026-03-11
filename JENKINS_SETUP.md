@@ -115,9 +115,14 @@ After completing the initial setup, install additional plugins required for the 
 
 ### Required Additional Plugins
 
-Navigate to **Manage Jenkins** → **Manage Plugins** → **Available** tab
+Navigate to **Dashboard** → **Manage Jenkins** → **Plugins** → **Available plugins**
 
 Search for and install the following plugins:
+
+#### Git & GitHub (usually pre-installed)
+- ✅ **Git Plugin** - Git SCM support
+- ✅ **GitHub Plugin** - GitHub integration (includes webhook support)
+- ✅ **GitHub Branch Source Plugin** - Multi-branch pipeline support
 
 #### Maven & Build Tools
 - ✅ **Maven Integration Plugin** - Maven project support
@@ -127,30 +132,32 @@ Search for and install the following plugins:
 #### Docker
 - ✅ **Docker Plugin** - Docker integration
 - ✅ **Docker Pipeline** - Docker commands in pipeline
-- ✅ **Docker Commons** - Docker common functionality
+- ✅ **Docker Commons Plugin** - Docker common functionality
 
 #### Testing & Reporting
 - ✅ **JUnit Plugin** - Publish JUnit test results (usually pre-installed)
-- ✅ **JaCoCo Plugin** - Code coverage visualization
+- ✅ **Code Coverage API Plugin** - Code coverage visualization (replaces deprecated JaCoCo plugin)
 - ✅ **HTML Publisher Plugin** - Publish HTML reports
-- ✅ **Test Results Analyzer** - Detailed test analysis
+- ✅ **Test Results Analyzer Plugin** - Detailed test analysis
 
 #### Optional but Recommended
 - ✅ **Blue Ocean** - Modern Jenkins UI
-- ✅ **Timestamper** - Timestamps in console output
-- ✅ **Build Timeout** - Abort builds after timeout
-- ✅ **Workspace Cleanup** - Clean workspace before builds
-- ✅ **AnsiColor** - ANSI color in console output
+- ✅ **Timestamper Plugin** - Timestamps in console output
+- ✅ **Build Timeout Plugin** - Abort builds after timeout
+- ✅ **Workspace Cleanup Plugin** - Clean workspace before builds
+- ✅ **AnsiColor Plugin** - ANSI color in console output
 
 ### Installation Steps
 
-1. **Manage Jenkins** → **Manage Plugins**
-2. Click **Available** tab
-3. Use the search box to find each plugin
-4. Check the box next to each plugin
-5. Click **Install without restart** at the bottom
-6. Wait for installation to complete
-7. Check **Restart Jenkins when installation is complete and no jobs are running**
+1. **Dashboard** → **Manage Jenkins** → **Plugins**
+2. Click **Available plugins** tab
+3. Use the search box to find each plugin (note: plugins marked "usually pre-installed" may already be installed)
+4. Check the box next to each plugin that isn't already installed
+5. Click **Install** button (top right)
+6. On the installation page, check **Restart Jenkins when installation is complete and no jobs are running**
+7. Wait for installation to complete and Jenkins to restart
+
+> **Note**: GitHub webhook functionality is included in the **GitHub Plugin**, not a separate plugin. The Git and GitHub plugins are usually installed automatically when you select "Install suggested plugins" during initial setup.
 
 ---
 
@@ -158,7 +165,7 @@ Search for and install the following plugins:
 
 ### Configure JDK
 
-**Manage Jenkins** → **Global Tool Configuration** → **JDK**
+**Dashboard** → **Manage Jenkins** → **Tools** → **JDK installations**
 
 1. Click **Add JDK**
 2. Name: `JDK-17`
@@ -168,7 +175,7 @@ Search for and install the following plugins:
 
 ### Configure Maven
 
-**Manage Jenkins** → **Global Tool Configuration** → **Maven**
+**Dashboard** → **Manage Jenkins** → **Tools** → **Maven installations**
 
 1. Click **Add Maven**
 2. Name: `Maven-3.9`
@@ -178,7 +185,7 @@ Search for and install the following plugins:
 
 ### Configure Docker
 
-**Manage Jenkins** → **Global Tool Configuration** → **Docker**
+**Dashboard** → **Manage Jenkins** → **Tools** → **Docker installations**
 
 1. Click **Add Docker**
 2. Name: `Docker`
@@ -246,14 +253,14 @@ Access at: http://localhost:8090
 
 ### Verify Installed Plugins
 
-1. Navigate to **Manage Jenkins** → **Manage Plugins**
-2. Click **Installed** tab
+1. Navigate to **Dashboard** → **Manage Jenkins** → **Plugins**
+2. Click **Installed plugins** tab
 3. Search for each required plugin
 4. Verify all are installed and up-to-date
 
 ### Test Jenkins Configuration
 
-1. Go to **Manage Jenkins** → **System Information**
+1. Go to **Dashboard** → **Manage Jenkins** → **System Information**
 2. Verify:
    - `JAVA_HOME` is set
    - `MAVEN_HOME` is set (after configuration)
@@ -329,10 +336,11 @@ docker exec quote-jenkins cat /var/jenkins_home/secrets/initialAdminPassword
 
 **Solutions**:
 1. Check internet connection
-2. **Manage Jenkins** → **Manage Plugins** → **Advanced**
-3. Update "Update Site" URL to: `https://updates.jenkins.io/update-center.json`
-4. Click **Submit** then **Check Now**
-5. Try installing plugins again
+2. **Dashboard** → **Manage Jenkins** → **Plugins** → **Advanced settings**
+3. Scroll down to "Update Site" section
+4. Verify URL is: `https://updates.jenkins.io/update-center.json`
+5. Click **Submit** then click **Check now** button
+6. Try installing plugins again
 
 ### Out of Memory Errors
 

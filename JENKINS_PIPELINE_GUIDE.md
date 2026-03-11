@@ -15,7 +15,7 @@ This guide helps you create and run the Jenkins pipeline for the Quote REST API 
 ### Step 1: Create New Job
 
 1. Open Jenkins at **http://localhost:8090**
-2. Click **New Item** (top left)
+2. Click **+ New Item** (left sidebar)
 3. Enter job name: `quote-rest-api-pipeline`
 4. Select **Pipeline**
 5. Click **OK**
@@ -26,7 +26,8 @@ This guide helps you create and run the Jenkins pipeline for the Quote REST API 
 
 - ✅ **Description**: `CI/CD pipeline for Quote REST API`
 - ✅ Check **Discard old builds**
-  - Strategy: Log Rotation
+  - Strategy: **Log Rotation**
+  - Days to keep builds: (leave blank)
   - Max # of builds to keep: `10`
 
 #### Build Triggers
@@ -37,23 +38,134 @@ Choose one or both:
 - ✅ Check **Poll SCM**
 - Schedule: `H/5 * * * *`
 
-**Option B: GitHub Webhook** (Trigger on push)
-- Configure webhook in GitHub repository settings
-- Payload URL: `http://your-jenkins-url:8090/github-webhook/`
+**Option B: GitHub hook trigger** (Trigger on push - requires GitHub plugin)
+- ✅ Check **GitHub hook trigger for GITScm polling**
+- Then configure webhook in GitHub repository settings:
+  - Go to repository → Settings → Webhooks → Add webhook
+  - Payload URL: `http://your-jenkins-url:8090/github-webhook/`
+  - Content type: `application/json`
+  - Select: "Just the push event"
 
 #### Pipeline Configuration
 
-1. **Definition**: `Pipeline script from SCM`
-2. **SCM**: `Git`
-3. **Repository URL**: Enter your Git repository URL
-   - For local: `file:///workspace` (if using Docker volume)
-   - For GitHub: `https://github.com/yourusername/quote-rest-api.git`
-4. **Branch Specifier**: `*/main` (or your default branch)
-5. **Script Path**: `Jenkinsfile`
+**Note**: If "Pipeline script from SCM" doesn't show SCM options, you may need to install the Git plugin first. See troubleshooting below.
 
-#### Advanced Options (Optional)
+1. **Definition**: Select `Pipeline script from SCM` from the dropdown
+2. **SCM**: Select `Git` (this dropdown should appear)
+3. **Repositories**:
+   - **Repository URL**: Enter your Git repository URL
+     - For local: `file:///workspace` (if using Docker volume)
+     - For GitHub: `https://github.com/yourusername/quote-rest-api.git`
+   - **Credentials**: Select "- none -" for public repos, or add credentials for private repos
+4. **Branches to build**:
+   - Branch Specifier (blank for 'any'): `*/main` (or `*/master`)
+5. **Repository browser**: (Auto)
+6. **Script Path**: `Jenkinsfile`
 
-- **Lightweight checkout**: ✅ Checked (faster)
+**Advanced Options** (click to expand if needed):
+- **Lightweight checkout**: ✅ Checked (faster, recommended)
+
+---
+
+#### Adding Build Parameters (Optional)
+
+Parameters allow you to customize builds at runtime, such as selecting which branch to build or passing configuration values.
+
+**Step 1: Enable Parameters**
+
+In the **General** section:
+1. ✅ Check **This project is parameterized**
+2. Click **Add Parameter** to add one or more parameters
+
+**Step 2: Add Parameters**
+
+Common parameter types:
+
+**String Parameter** (for branch names, versions, etc.):
+- Name: `BRANCH_NAME`
+- Default Value: `main`
+- Description: `Git branch to build`
+
+**Choice Parameter** (dropdown selection):
+- Name: `ENVIRONMENT`
+- Choices (one per line):
+  ```
+  development
+  staging
+  production
+  ```
+- Description: `Target environment for deployment`
+
+**Boolean Parameter** (checkbox):
+- Name: `RUN_TESTS`
+- Default: ✅ Checked
+- Description: `Run unit and integration tests`
+
+**Step 3: Use Parameters in Pipeline**
+
+To use the branch parameter, update your **Branches to build** in Pipeline Configuration:
+- Branch Specifier: `*/${BRANCH_NAME}` (instead of `*/main`)
+
+The parameter will now appear when you click **Build with Parameters**.
+
+**Example: Multiple Parameters**
+
+You can add several parameters for flexible builds:
+
+1. **BRANCH_NAME** (String): `main` - Branch to build
+2. **SKIP_TESTS** (Boolean): unchecked - Skip test execution
+3. **DOCKER_TAG** (String): `latest` - Docker image tag
+4. **DEPLOY** (Boolean): unchecked - Deploy after build
+
+**Using Parameters in Jenkinsfile**
+
+Access parameters in your Jenkinsfile with `${params.PARAMETER_NAME}`:
+
+```groovy
+pipeline {
+    agent any
+    
+    stages {
+        stage('Build') {
+            when {
+                expression { !params.SKIP_TESTS }
+            }
+            steps {
+                echo "Building branch: ${params.BRANCH_NAME}"
+                sh './mvnw clean package'
+            }
+        }
+    }
+}
+```
+
+**Building with Parameters**
+
+Once parameters are added:
+1. The **Build Now** button changes to **Build with Parameters**
+2. Click it to see a form with your parameters
+3. Modify values as needed
+4. Click **Build** to start
+
+---
+
+#### Troubleshooting: No SCM Options Appear
+
+If you don't see SCM/Repository fields after selecting "Pipeline script from SCM":
+
+**Problem**: Git plugin not installed or not loaded
+
+**Solution**:
+1. Go to **Manage Jenkins** → **Plugins**
+2. Click **Available plugins** tab
+3. Search for "Git plugin"
+4. Install if not present, or click **Restart Jenkins** if recently installed
+5. Return to job configuration and try again
+
+Alternatively, use **Pipeline script** option (inline):
+- Select **Pipeline script** instead
+- Paste your Jenkinsfile content directly
+- This works without additional plugins
 
 ### Step 3: Save and Build
 
@@ -89,39 +201,44 @@ The pipeline executes these stages in order:
 ### Build Status
 
 On the job page, you'll see:
-- ✅ **Blue ball**: Successful build
-- ❌ **Red ball**: Failed build  
-- ⚠️ **Yellow ball**: Unstable (tests failed)
-- ⚪ **Gray ball**: Not built yet
+- ✅ **Green checkmark** (or blue ball in classic UI): Successful build
+- ❌ **Red X** (or red ball in classic UI): Failed build  
+- ⚠️ **Yellow warning** (or yellow ball in classic UI): Unstable (tests failed)
+- ⚪ **Gray circle**: Not built yet
+- 🔵 **Blue ball**: Running build (with progress bar)
 
 ### Test Results
 
-Click on a build number → **Test Results**
+Click on a build number → **Test Result** (left sidebar)
 
 Shows:
 - Total tests run
 - Passed / Failed / Skipped
-- Test trends over time
-- Individual test details
+- Test duration and trends over time
+- Package and class-level test details
+- Detailed failure messages and stack traces
 
 ### Code Coverage
 
-Click on a build number → **Coverage Report**
+Click on a build number → **JaCoCo** (left sidebar)
 
 Shows:
 - Line coverage percentage
 - Branch coverage percentage
-- Coverage trends
-- Detailed class-level coverage
+- Instruction and complexity coverage
+- Coverage trends over builds
+- Detailed package and class-level coverage with drill-down
 
 ### Playwright Report
 
-Click on a build number → **Playwright Test Report**
+Click on a build number → **Playwright Test Report** (left sidebar)
 
 Shows:
 - HTML report with test details
-- Screenshots (if any failures)
-- Detailed test execution logs
+- Test execution timeline
+- Screenshots and videos (if any failures)
+- Detailed test execution logs and traces
+- Filter by passed/failed/skipped tests
 
 ---
 
@@ -203,10 +320,11 @@ post {
 **Problem**: Tests fail
 
 **Solution**:
-- Click on build → **Console Output**
-- Look for test failure details
+- Click on build number → **Console Output** (left sidebar)
+- Look for test failure details in the logs
+- Check **Test Result** link for detailed failure messages
 - Fix failing tests locally first
-- Re-run build
+- Click **Build Now** to re-run
 
 ### Build Fails at "Start Services" Stage
 
@@ -337,7 +455,8 @@ docker-compose down
 
 **Need Help?**
 
-- Check **Console Output** for detailed logs
-- Review **Test Results** for test failures
-- View **Coverage Report** for code coverage
-- Check Jenkins logs: `.\scripts\jenkins\jenkins-docker.ps1 logs`
+- Check **Console Output** (left sidebar) for detailed build logs
+- Review **Test Result** (left sidebar) for test failures
+- View **JaCoCo** (left sidebar) for code coverage reports
+- Check **Pipeline Steps** for stage-by-stage execution details
+- Check Jenkins container logs: `.\scripts\jenkins\jenkins-docker.ps1 logs`
