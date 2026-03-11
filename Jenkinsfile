@@ -48,7 +48,7 @@ pipeline {
             steps {
                 echo '🔨 Building application...'
                 sh """
-                    ./mvnw ${MAVEN_CLI_OPTS} clean compile \
+                    mvn ${MAVEN_CLI_OPTS} clean compile \
                         -DskipTests
                 """
             }
@@ -58,7 +58,7 @@ pipeline {
             steps {
                 echo '🧪 Running unit tests...'
                 sh """
-                    ./mvnw ${MAVEN_CLI_OPTS} test \
+                    mvn ${MAVEN_CLI_OPTS} test \
                         -Dtest=!*IntegrationTest
                 """
             }
@@ -74,7 +74,7 @@ pipeline {
             steps {
                 echo '✨ Checking code formatting with Spotless...'
                 sh """
-                    ./mvnw ${MAVEN_CLI_OPTS} spotless:check
+                    mvn ${MAVEN_CLI_OPTS} spotless:check
                 """
             }
         }
@@ -83,7 +83,7 @@ pipeline {
             steps {
                 echo '🔧 Running integration tests with Testcontainers...'
                 sh """
-                    ./mvnw ${MAVEN_CLI_OPTS} verify \
+                    mvn ${MAVEN_CLI_OPTS} verify \
                         -DskipUnitTests=true \
                         -Dtest=*IntegrationTest
                 """
@@ -100,7 +100,7 @@ pipeline {
             steps {
                 echo '📊 Generating code coverage report...'
                 sh """
-                    ./mvnw ${MAVEN_CLI_OPTS} jacoco:report
+                    mvn ${MAVEN_CLI_OPTS} jacoco:report
                 """
             }
             post {
@@ -120,7 +120,7 @@ pipeline {
             steps {
                 echo '📦 Packaging application...'
                 sh """
-                    ./mvnw ${MAVEN_CLI_OPTS} package \
+                    mvn ${MAVEN_CLI_OPTS} package \
                         -DskipTests
                 """
             }
