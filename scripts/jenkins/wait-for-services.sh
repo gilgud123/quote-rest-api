@@ -55,6 +55,46 @@ wait_for_postgres() {
     return 1
 }
 
+wait_for_keycloak() {
+    local elapsed=0
+    
+    echo -e "${YELLOW}Waiting for Keycloak...${NC}"
+    
+    while [ $elapsed -lt $TIMEOUT ]; do
+        if docker exec quote-keycloak curl -s -f -o /dev/null http://localhost:8080/health/live 2>/dev/null; then
+            echo -e "${GREEN}✓ Keycloak is ready${NC}"
+            return 0
+        fi
+        
+        echo -e "${YELLOW}  Waiting... (${elapsed}s/${TIMEOUT}s)${NC}"
+        sleep $INTERVAL
+        elapsed=$((elapsed + INTERVAL))
+    done
+    
+    echo -e "${RED}✗ Keycloak failed to become ready within ${TIMEOUT}s${NC}"
+    return 1
+}
+
+wait_for_app() {
+    local elapsed=0
+    
+    echo -e "${YELLOW}Waiting for Spring Boot App...${NC}"
+    
+    while [ $elapsed -lt $TIMEOUT ]; do
+        if docker exec quote-rest-api curl -s -f -o /dev/null http://localhost:8080/actuator/health 2>/dev/null; then
+            echo -e "${GREEN}✓ Spring Boot App is ready${NC}"
+            return 0
+        fi
+        
+        echo -e "${YELLOW}  Waiting... (${elapsed}s/${TIMEOUT}s)${NC}"
+        sleep $INTERVAL
+        elapsed=$((elapsed + INTERVAL))
+    done
+    
+    echo -e "${RED}✗ Spring Boot App failed to become ready within ${TIMEOUT}s${NC}"
+    return 1
+}
+
 # Main execution
 echo -e "${YELLOW}=== Waiting for Services ===${NC}\n"
 
@@ -67,10 +107,10 @@ for service in "$@"; do
             wait_for_postgres || FAILED=1
             ;;
         app)
-            wait_for_url "http://quote-rest-api:8080/actuator/health" "Spring Boot App" || FAILED=1
+            wait_for_app || FAILED=1
             ;;
         keycloak)
-            wait_for_url "http://quote-keycloak:8080/health/live" "Keycloak" || FAILED=1
+            wait_for_keycloak || FAILED=1
             ;;
         jenkins)
             wait_for_url "http://localhost:8090" "Jenkins" || FAILED=1

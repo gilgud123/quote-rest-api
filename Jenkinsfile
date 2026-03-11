@@ -5,9 +5,9 @@ pipeline {
     agent {
         docker {
             image 'maven:3.9-eclipse-temurin-17'
-            args '-v /var/run/docker.sock:/var/run/docker.sock -v maven-repo:/root/.m2 -u root --network testingquote_quote-network'
+            args '-v /var/run/docker.sock:/var/run/docker.sock -v maven-repo:/root/.m2 -u root'
             // Note: Docker CLI must be installed in the Maven container for docker compose commands
-            // Maven container joins testingquote_quote-network to communicate with services (Keycloak, PostgreSQL, App)
+            // Network connectivity to services (Keycloak, PostgreSQL) handled via host networking
         }
     }
 
