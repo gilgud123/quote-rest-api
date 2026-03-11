@@ -214,6 +214,7 @@
               <expandEmptyElements>false</expandEmptyElements>
             </sortPom>
           </pom>
+          <!-- YAML formatting disabled in CI - requires npm which is not available in Maven container
           <yaml>
             <includes>
               <include>src/**/*.yml</include>
@@ -230,6 +231,7 @@
               </config>
             </prettier>
           </yaml>
+          -->
           <markdown>
             <includes>
               <include>.github/**/*.md</include>

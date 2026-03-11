@@ -76,8 +76,7 @@ pipeline {
             steps {
                 echo '✨ Checking code formatting with Spotless...'
                 sh """
-                    mvn ${MAVEN_CLI_OPTS} spotless:check \
-                        -Dspotless.yaml.skip=true
+                    mvn ${MAVEN_CLI_OPTS} spotless:check
                 """
             }
         }
