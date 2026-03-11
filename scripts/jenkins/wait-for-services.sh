@@ -67,10 +67,10 @@ for service in "$@"; do
             wait_for_postgres || FAILED=1
             ;;
         app)
-            wait_for_url "http://localhost:8080/actuator/health" "Spring Boot App" || FAILED=1
+            wait_for_url "http://quote-rest-api:8080/actuator/health" "Spring Boot App" || FAILED=1
             ;;
         keycloak)
-            wait_for_url "http://localhost:8081/health/live" "Keycloak" || FAILED=1
+            wait_for_url "http://quote-keycloak:8080/health/live" "Keycloak" || FAILED=1
             ;;
         jenkins)
             wait_for_url "http://localhost:8090" "Jenkins" || FAILED=1
