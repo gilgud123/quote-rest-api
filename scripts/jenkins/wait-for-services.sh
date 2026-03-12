@@ -21,7 +21,7 @@ wait_for_url() {
     echo -e "${YELLOW}Waiting for ${service_name} at ${url}...${NC}"
     
     while [ $elapsed -lt $TIMEOUT ]; do
-        if curl -s -f -o /dev/null "${url}"; then
+        if curl -s -f --connect-timeout 5 --max-time $INTERVAL -o /dev/null "${url}"; then
             echo -e "${GREEN}✓ ${service_name} is ready${NC}"
             return 0
         fi
