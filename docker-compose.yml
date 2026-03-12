@@ -85,10 +85,7 @@ services:
 
   # Jenkins CI/CD Server
   jenkins:
-    build:
-      context: .
-      dockerfile: Dockerfile.jenkins
-    image: quote-jenkins:latest
+    image: jenkins/jenkins:lts-jdk17
     container_name: quote-jenkins
     privileged: true
     user: root
