@@ -160,12 +160,14 @@ pipeline {
             }
             post {
                 always {
-                    // Publish JaCoCo coverage report
-                    jacoco(
-                        execPattern: 'target/jacoco.exec',
-                        classPattern: 'target/classes',
-                        sourcePattern: 'src/main/java',
-                        exclusionPattern: '**/*Test*.class,**/*Config*.class,**/entity/**,**/dto/**'
+                    // Publish JaCoCo coverage report via Code Coverage API
+                    recordCoverage(
+                        tools: [
+                            jacoco(
+                                pattern: 'target/site/jacoco/jacoco.xml',
+                                skipNoReports: false
+                            )
+                        ]
                     )
                 }
             }
