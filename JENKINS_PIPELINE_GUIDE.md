@@ -334,27 +334,26 @@ Alternatively, use **Pipeline script** option (inline):
 
 ## Pipeline Stages
 
-The pipeline executes these stages in order:
+The exact stages and their order are defined in the `Jenkinsfile` in this repository. Open that file in your editor or via the Git hosting UI to see the authoritative list of stages that will run in your pipeline.
 
-| Stage | Duration | Description |
-|-------|----------|-------------|
-| 📦 Checkout | ~5s | Clone repository |
-| 🔨 Build | ~30s | Maven compile |
-| 🧪 Unit Tests | ~20s | Run unit tests |
-| ✨ Code Quality | ~10s | Spotless formatting check |
-| 🔧 Integration Tests | ~45s | Testcontainers tests |
-| 📊 Code Coverage | ~15s | Generate JaCoCo report |
-| 📦 Package | ~20s | Create JAR file |
-| 🚀 Start Services | ~60s | Start postgres, keycloak, app |
-| 🎭 Playwright Tests | ~45s | API end-to-end tests |
-| 🐳 Docker Build | ~90s | Build Docker image |
+Below is a typical high-level breakdown of what the pipeline does:
 
-**Total Duration**: ~8-12 minutes
+| Stage (typical)        | Purpose                                  |
+|------------------------|------------------------------------------|
+| 📦 Checkout            | Clone repository and fetch source code   |
+| 🔨 Build & Unit Tests  | Compile with Maven and run unit tests    |
+| ✨ Code Quality        | Apply formatting / static checks         |
+| 🔧 Integration Tests   | Run integration tests (e.g. Testcontainers) |
+| 📊 Code Coverage       | Generate JaCoCo or similar coverage report |
+| 📦 Package / Docker    | Package application and/or build images  |
+
+> ℹ️ Refer to the `Jenkinsfile` for the **current, exact** stage names and any additional stages (such as service startup, end-to-end tests, or deployment).
 
 ---
 
 ## Viewing Results
 
+## Viewing Results
 ### Build Status
 
 On the job page, you'll see:
