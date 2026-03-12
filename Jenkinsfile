@@ -11,6 +11,19 @@ pipeline {
         }
     }
 
+    parameters {
+        string(
+            name: 'BRANCH_NAME',
+            defaultValue: 'main',
+            description: 'Git branch to checkout and test'
+        )
+        choice(
+            name: 'MAVEN_PROFILE',
+            choices: ['default', 'dev', 'prod'],
+            description: 'Maven profile to use for the build'
+        )
+    }
+
     environment {
         // Maven options (MaxPermSize removed - not needed in Java 17+)
         MAVEN_OPTS = '-Xmx1024m'
@@ -63,9 +76,14 @@ pipeline {
         
         stage('Checkout') {
             steps {
-                echo '📦 Checking out source code...'
-                checkout scm
+                echo "📦 Checking out branch: ${params.BRANCH_NAME}"
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: "*/${params.BRANCH_NAME}"]],
+                    userRemoteConfigs: scm.userRemoteConfigs
+                ])
                 sh 'git log -1 --oneline'
+                sh "echo 'Testing branch: ${params.BRANCH_NAME}'"
             }
         }
 
