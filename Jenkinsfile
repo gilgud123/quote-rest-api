@@ -11,14 +11,6 @@ pipeline {
         }
     }
 
-    parameters {
-        string(
-            name: 'BRANCH_NAME',
-            defaultValue: 'master',
-            description: 'Git branch name to checkout and test (e.g., master, jenkins-setup, feature/new-api). Do NOT include "origin/" prefix.'
-        )
-    }
-
     environment {
         // Maven options (MaxPermSize removed - not needed in Java 17+)
         MAVEN_OPTS = '-Xmx1024m'
@@ -73,8 +65,14 @@ pipeline {
             steps {
                 echo "📦 Checking out branch: ${params.BRANCH_NAME}"
                 script {
-                    // Clean branch name (remove origin/ prefix if present)
-                    def branchName = params.BRANCH_NAME.replaceAll(/^origin\//, '')
+                    // Git Parameter returns format like "origin/jenkins-setup"
+                    // Extract just the branch name part after the last /
+                    def branchName = params.BRANCH_NAME.contains('/') ? 
+                        params.BRANCH_NAME.substring(params.BRANCH_NAME.lastIndexOf('/') + 1) : 
+                        params.BRANCH_NAME
+                    
+                    echo "Using branch name: ${branchName}"
+                    
                     checkout([
                         $class: 'GitSCM',
                         branches: [[name: "*/${branchName}"]],
@@ -83,7 +81,7 @@ pipeline {
                     ])
                 }
                 sh 'git log -1 --oneline'
-                sh "echo 'Testing branch: ${params.BRANCH_NAME}'"
+                sh "echo 'Successfully checked out: ${params.BRANCH_NAME}'"
             }
         }
 
