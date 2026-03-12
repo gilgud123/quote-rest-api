@@ -74,11 +74,11 @@ The pipeline supports branch selection using the Git Parameter plugin, giving yo
 
 **Prerequisites:**
 1. **Git Parameter Plugin** must be installed (see installation steps below)
-2. **Jenkinsfile must have a parameters block** to preserve the parameter between builds
+2. **Jenkinsfile must declare the Git Parameter** via a top-level `properties([...])` call (already included in the project)
 
 **How It Works:**
-- Jenkinsfile declares it needs a `BRANCH_NAME` parameter
-- Git Parameter plugin (configured in Jenkins UI) provides a dropdown with all branches
+- Jenkinsfile declares the `BRANCH_NAME` Git Parameter via a top-level `properties([parameters([gitParameter(...)])])` call, placed **before** the `pipeline { }` block
+- On the first build, Jenkins reads this declaration and automatically registers the branch dropdown — no manual UI configuration is needed
 - You select which branch to test from the dropdown
 - Pipeline checks out and tests the selected branch
 
@@ -95,32 +95,21 @@ The pipeline supports branch selection using the Git Parameter plugin, giving yo
 6. Click **Install**
 7. After installation: **Manage Jenkins** → **Restart Safely**
 
-**Step 2: Configure Git Parameter in Job**
+**Step 2: No Manual UI Configuration Needed**
 
-1. Go to your job configuration
-2. In **General** section:
-   - ✅ Check **"This project is parameterized"**
-   - Click **Add Parameter** → Select **Git Parameter**
+Because the Jenkinsfile uses a top-level `properties([parameters([gitParameter(...)])])` call, Jenkins automatically registers the `BRANCH_NAME` branch dropdown after the first build. You do **not** need to manually check "This project is parameterized" or configure the Git Parameter in the Jenkins UI — the Jenkinsfile handles this for you.
 
-**Step 3: Configure Git Parameter Settings**
+**Step 3: Verify Parameter Settings (Optional)**
 
-Fill in these settings **exactly**:
+After the first build you can confirm the parameter was registered correctly by going to **Configure** on the job:
 
-- **Name**: `BRANCH_NAME` (must match Jenkinsfile parameter)
-- **Parameter Type**: `Branch or Tag`
-- **Default Value**: `master` (or your default branch)
-- **Description**: `Select branch to build and test`
-
-**Expand "Advanced" section:**
-- **Branch Filter**: `.*` (or leave blank to show all branches)
-- **Sort Mode**: `DESCENDING_SMART` (shows recent branches first)
+- **Name**: `BRANCH_NAME`
+- **Parameter Type**: `Branch`
+- **Default Value**: `master`
+- **Branch Filter**: `origin/(.*)`
 - **Selected Value**: `DEFAULT`
-- **List Size**: `10` (optional - limits dropdown length)
 
-**⚠️ Critical Settings:**
-- Parameter Type MUST be `Branch or Tag` (NOT just "Branch")
-- Name MUST be exactly `BRANCH_NAME`
-- Do NOT include `origin/` in default value - just the branch name
+These values are sourced directly from the `gitParameter(...)` call in the Jenkinsfile and should not need manual adjustment.
 
 **Step 4: Configure Pipeline Section**
 
@@ -133,29 +122,36 @@ Scroll to **Pipeline** section:
   - Do NOT use `${BRANCH_NAME}` here - that's for testing branches, not for finding the Jenkinsfile
 - **Script Path**: `Jenkinsfile`
 
-**Step 5: Jenkinsfile Parameters Block**
+**Step 5: Jenkinsfile `properties([...])` Declaration**
 
-Your Jenkinsfile MUST include a `parameters` block (already included in the project):
+The Jenkinsfile uses a top-level `properties([parameters([gitParameter(...)])])` call **outside** the `pipeline { }` block to declare the branch parameter. This is already present in the project:
 
 ```groovy
+// Declare the Git Parameter BEFORE the pipeline block.
+// Jenkins reads this on every run and keeps the parameter configuration
+// in sync with the Jenkinsfile, preventing it from being lost between builds.
+properties([
+    parameters([
+        gitParameter(
+            name: 'BRANCH_NAME',
+            type: 'PT_BRANCH',
+            defaultValue: 'master',
+            description: 'Select branch to build',
+            branchFilter: 'origin/(.*)',
+            selectedValue: 'DEFAULT'
+        )
+    ])
+])
+
 pipeline {
     agent any
-    
-    parameters {
-        // This parameter is overridden by Git Parameter plugin configured in Jenkins UI
-        // Do not remove this block - it tells Jenkins to expect parameters
-        string(
-            name: 'BRANCH_NAME',
-            defaultValue: 'master',
-            description: 'Branch to test (configured via Git Parameter plugin in Jenkins UI)'
-        )
-    }
     
     stages {
         stage('Checkout') {
             steps {
                 script {
-                    // Extract branch name from Git Parameter format
+                    // Git Parameter returns format like "origin/jenkins-setup"
+                    // Extract just the branch name part after the last /
                     def branchName = params.BRANCH_NAME.contains('/') ? 
                         params.BRANCH_NAME.substring(params.BRANCH_NAME.lastIndexOf('/') + 1) : 
                         params.BRANCH_NAME
@@ -172,10 +168,10 @@ pipeline {
 }
 ```
 
-**Why the parameters block is needed:**
-- Without it, Jenkins removes the Git Parameter configuration after each build
-- It acts as a "placeholder" that Git Parameter plugin fills with the branch dropdown
-- The UI configuration overrides the default value with actual branch list
+**Why `properties([...])` instead of a `parameters { }` block inside `pipeline { }`:**
+- The top-level `properties([...])` call is the correct way to register the Git Parameter plugin's `gitParameter()` step in a Declarative Pipeline
+- It runs on every build and keeps the parameter definition in sync with the Jenkinsfile, so the branch dropdown is never lost between builds
+- A plain `parameters { string(...) }` block inside `pipeline { }` does not support `gitParameter()` — it only handles built-in parameter types like `string`, `choice`, etc.
 
 **Step 6: Save and Test**
 
