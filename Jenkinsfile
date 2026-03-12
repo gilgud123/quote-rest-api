@@ -18,7 +18,7 @@ pipeline {
     agent {
         docker {
             image 'maven:3.9-eclipse-temurin-17'
-            args '-v /var/run/docker.sock:/var/run/docker.sock -v maven-repo:/root/.m2 -u root'
+            args '-v /var/run/docker.sock:/var/run/docker.sock -v maven-repo:/root/.m2 -u root --network=host'
             // Note: Docker CLI must be installed in the Maven container for docker compose commands
             // Network connectivity to services (Keycloak, PostgreSQL) handled via host networking
         }
@@ -183,6 +183,58 @@ pipeline {
                 success {
                     // Archive the JAR file
                     archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                }
+            }
+        }
+
+        stage('Start Services') {
+            steps {
+                echo '🚀 Starting services for end-to-end tests...'
+                sh '''
+                    docker compose up -d postgres keycloak app
+                    chmod +x scripts/jenkins/wait-for-services.sh
+                    ./scripts/jenkins/wait-for-services.sh postgres keycloak app
+                '''
+            }
+            post {
+                failure {
+                    sh 'docker compose logs --tail=50 || true'
+                }
+            }
+        }
+
+        stage('Playwright Tests') {
+            steps {
+                echo '🎭 Running Playwright API tests...'
+                sh '''
+                    # Install Node.js if not present
+                    if ! command -v node > /dev/null 2>&1; then
+                        echo "Installing Node.js..."
+                        apt-get update -qq
+                        apt-get install -y -qq nodejs npm
+                    fi
+
+                    # Navigate to tests directory and install dependencies
+                    cd tests
+                    npm ci
+                    npx playwright install chromium --with-deps
+
+                    # Run tests (JUnit results written via playwright.config.js reporters)
+                    npx playwright test
+                '''
+            }
+            post {
+                always {
+                    junit testResults: 'tests/test-results/junit-results.xml', allowEmptyResults: true
+                    publishHTML(target: [
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'tests/playwright-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Playwright Test Report'
+                    ])
+                    sh 'docker compose stop app keycloak postgres || true'
                 }
             }
         }
