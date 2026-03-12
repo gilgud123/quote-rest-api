@@ -1,6 +1,19 @@
 // Jenkinsfile for Quote REST API
 // Declarative Pipeline for CI/CD
 
+properties([
+    parameters([
+        gitParameter(
+            name: 'BRANCH_NAME',
+            type: 'PT_BRANCH',
+            defaultValue: 'master',
+            description: 'Select branch to build',
+            branchFilter: 'origin/(.*)',
+            selectedValue: 'DEFAULT'
+        )
+    ])
+])
+
 pipeline {
     agent {
         docker {
