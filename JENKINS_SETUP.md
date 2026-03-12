@@ -58,8 +58,6 @@ Copy the password shown in the output.
 
 ### Step 1: Unlock Jenkins
 
-![Unlock Jenkins Screen]
-
 1. Enter the initial admin password you retrieved
 2. Click **Continue**
 
