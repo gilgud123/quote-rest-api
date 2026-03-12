@@ -146,7 +146,7 @@ pipeline {
             post {
                 always {
                     // Publish integration test results
-                    junit testResults: "${INTEGRATION_TEST_DIR}/**/*.xml", allowEmptyResults: true
+                    junit testResults: "${TEST_REPORT_DIR}/**/*.xml", allowEmptyResults: true
                 }
             }
         }
