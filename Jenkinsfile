@@ -55,20 +55,20 @@ pipeline {
             steps {
                 echo '⚙️ Setting up environment...'
                 sh '''
-                    # Install Docker CLI if not present
+                    # Verify Docker CLI is available in the agent image
                     if ! command -v docker &> /dev/null; then
-                        echo "Installing Docker CLI..."
-                        apt-get update -qq
-                        apt-get install -y -qq ca-certificates curl
-                        install -m 0755 -d /etc/apt/keyrings
-                        curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
-                        chmod a+r /etc/apt/keyrings/docker.asc
-                        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian bookworm stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-                        apt-get update -qq
-                        apt-get install -y -qq docker-ce-cli docker-compose-plugin
-                        echo "Docker CLI installed successfully"
-                    else
-                        echo "Docker CLI already installed"
+                        echo "ERROR: Docker CLI is not available in this Jenkins agent."
+                        echo "Please run this pipeline on an agent or Docker image with Docker preinstalled"
+                        echo "(for example, a custom Maven image that includes Docker CLI and compose)."
+                        exit 1
+                    fi
+
+                    echo "Docker CLI detected:"
+                    docker version || echo "Warning: unable to retrieve Docker version"
+
+                    # Optionally check for docker compose support
+                    if command -v docker &> /dev/null; then
+                        docker compose version 2>/dev/null || docker-compose version 2>/dev/null || echo "docker compose / docker-compose not found; ensure your agent provides it if needed."
                     fi
                 '''
             }
