@@ -112,10 +112,50 @@ See [MCP_SETUP.md](tests/MCP_SETUP.md) for installation and usage guide.
 # 1. Start PostgreSQL
 docker-compose up -d postgres
 
-# 2. Configure Claude Desktop (see MCP_SETUP.md)
+# 2. Configure GitHub Copilot CLI (see MCP_SETUP.md)
 
-# 3. Use Claude to test and inspect your API
+# 3. Use Copilot to test and inspect your API
 ```
+
+## CI/CD with Jenkins
+
+This project includes a complete Jenkins CI/CD pipeline for automated builds, testing, and Docker image creation.
+
+### Quick Start
+
+```powershell
+# Start Jenkins
+.\scripts\jenkins\jenkins-docker.ps1 start
+
+# Access Jenkins at http://localhost:8090
+# Get initial password
+.\scripts\jenkins\jenkins-docker.ps1 password
+```
+
+### Pipeline Features
+
+- ✅ Automated builds with Maven
+- ✅ Unit and integration tests
+- ✅ Code quality checks (Spotless)
+- ✅ Code coverage reporting (JaCoCo)
+- ✅ Playwright API tests
+- ✅ Docker image building
+- ✅ Comprehensive test reporting
+
+### Documentation
+
+- **[JENKINS_SETUP.md](./JENKINS_SETUP.md)** - Installation and configuration
+- **[JENKINS_PIPELINE_GUIDE.md](./JENKINS_PIPELINE_GUIDE.md)** - Pipeline usage and troubleshooting
+
+### Pipeline Stages
+
+1. 📦 Checkout → 🔨 Build → 🧪 Unit Tests
+2. ✨ Code Quality → 🔧 Integration Tests
+3. 📊 Coverage → 📦 Package
+4. 🚀 Start Services → 🎭 Playwright Tests
+5. 🐳 Docker Build
+
+**Total Duration**: ~8-12 minutes
 
 ## Notes
 
