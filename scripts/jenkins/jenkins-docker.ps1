@@ -12,7 +12,7 @@ $ComposeFile = Join-Path $ProjectRoot "docker-compose.yml"
 
 function Start-Jenkins {
     Write-Host "Starting Jenkins..." -ForegroundColor Green
-    docker-compose -f $ComposeFile up -d jenkins
+    docker compose -f $ComposeFile up -d jenkins
     
     Write-Host "`nJenkins is starting up..." -ForegroundColor Yellow
     Write-Host "This may take 1-2 minutes for initial setup." -ForegroundColor Yellow
@@ -23,19 +23,19 @@ function Start-Jenkins {
 
 function Stop-Jenkins {
     Write-Host "Stopping Jenkins..." -ForegroundColor Yellow
-    docker-compose -f $ComposeFile stop jenkins
+    docker compose -f $ComposeFile stop jenkins
     Write-Host "Jenkins stopped." -ForegroundColor Green
 }
 
 function Restart-Jenkins {
     Write-Host "Restarting Jenkins..." -ForegroundColor Yellow
-    docker-compose -f $ComposeFile restart jenkins
+    docker compose -f $ComposeFile restart jenkins
     Write-Host "Jenkins restarted." -ForegroundColor Green
 }
 
 function Show-Logs {
     Write-Host "Showing Jenkins logs (Ctrl+C to exit)..." -ForegroundColor Cyan
-    docker-compose -f $ComposeFile logs -f jenkins
+    docker compose -f $ComposeFile logs -f jenkins
 }
 
 function Show-Status {
