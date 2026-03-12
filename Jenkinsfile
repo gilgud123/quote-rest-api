@@ -212,14 +212,14 @@ pipeline {
                 // Stop all Docker Compose services
                 sh 'docker compose down || true'
             }
-            
-            // Clean up workspace (optional)
-            cleanWs(
-                deleteDirs: true,
-                patterns: [
-                    [pattern: 'target/**', type: 'INCLUDE']
-                ]
-            )
+
+            // Clean up build artifacts (optional, no extra plugins required)
+            script {
+                // Remove the Maven target directory using built-in steps
+                dir('target') {
+                    deleteDir()
+                }
+            }
         }
         success {
             echo '✅ Pipeline completed successfully!'
