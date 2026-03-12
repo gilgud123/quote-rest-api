@@ -113,7 +113,7 @@ pipeline {
                 echo '🧪 Running unit tests...'
                 sh """
                     mvn ${MAVEN_CLI_OPTS} test \
-                        -Dtest=!*IntegrationTest
+                        -Dtest=!*IT
                 """
             }
             post {
@@ -137,10 +137,8 @@ pipeline {
             steps {
                 echo '🔧 Running integration tests with Testcontainers...'
                 sh """
-                    mvn ${MAVEN_CLI_OPTS} verify \
-                        -DskipUnitTests=true \
-                        -Dtest=*IntegrationTest \
-                        -Dsurefire.failIfNoSpecifiedTests=false
+                    mvn ${MAVEN_CLI_OPTS} test \
+                        -Dtest=*IT
                 """
             }
             post {
