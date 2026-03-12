@@ -353,7 +353,6 @@ Below is a typical high-level breakdown of what the pipeline does:
 
 ## Viewing Results
 
-## Viewing Results
 ### Build Status
 
 On the job page, you'll see:
