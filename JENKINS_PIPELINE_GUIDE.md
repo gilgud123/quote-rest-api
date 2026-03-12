@@ -74,13 +74,13 @@ The pipeline supports branch selection using the Git Parameter plugin, giving yo
 
 **Prerequisites:**
 1. **Git Parameter Plugin** must be installed (see installation steps below)
-2. **Jenkinsfile must have a parameters block** to preserve the parameter between builds
+2. The Jenkinsfile must define a `BRANCH_NAME` Git parameter via its top-level `properties([...])` / `gitParameter(...)` configuration (already included in this project). You do **not** need to add a `parameters { ... }` block inside the `pipeline {}`.
 
 **How It Works:**
-- Jenkinsfile declares it needs a `BRANCH_NAME` parameter
-- Git Parameter plugin (configured in Jenkins UI) provides a dropdown with all branches
-- You select which branch to test from the dropdown
-- Pipeline checks out and tests the selected branch
+- The Jenkinsfile declares a `BRANCH_NAME` parameter using a top-level `properties([...])` block with `gitParameter(...)`.
+- Jenkins exposes this as a **Git Parameter** field on the job with a dropdown listing all matching branches.
+- You select which branch to test from the dropdown before running the build.
+- The pipeline checks out and tests the selected branch.
 
 ---
 
@@ -353,7 +353,6 @@ Below is a typical high-level breakdown of what the pipeline does:
 
 ## Viewing Results
 
-## Viewing Results
 ### Build Status
 
 On the job page, you'll see:
