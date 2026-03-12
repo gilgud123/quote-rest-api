@@ -77,11 +77,16 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo "📦 Checking out branch: ${params.BRANCH_NAME}"
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: "*/${params.BRANCH_NAME}"]],
-                    userRemoteConfigs: scm.userRemoteConfigs
-                ])
+                script {
+                    // Clean branch name (remove origin/ prefix if present)
+                    def branchName = params.BRANCH_NAME.replaceAll(/^origin\//, '')
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: "*/${branchName}"]],
+                        userRemoteConfigs: scm.userRemoteConfigs,
+                        extensions: [[$class: 'CloneOption', depth: 0, noTags: false, shallow: false]]
+                    ])
+                }
                 sh 'git log -1 --oneline'
                 sh "echo 'Testing branch: ${params.BRANCH_NAME}'"
             }
