@@ -56,9 +56,9 @@ wait_for_postgres() {
 }
 
 wait_for_keycloak() {
-    # Use host curl to probe the Keycloak health endpoint exposed on localhost.
+    # Use host curl to probe a Keycloak endpoint exposed on localhost.
     # This avoids relying on curl being installed inside the Keycloak container.
-    wait_for_url "http://localhost:8081/health/live" "Keycloak"
+    wait_for_url "http://localhost:8081/realms/master/.well-known/openid-configuration" "Keycloak"
 }
 
 wait_for_app() {
