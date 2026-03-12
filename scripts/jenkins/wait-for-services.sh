@@ -67,7 +67,7 @@ wait_for_app() {
     echo -e "${YELLOW}Waiting for Spring Boot App...${NC}"
     
     while [ $elapsed -lt $TIMEOUT ]; do
-        if docker exec quote-rest-api curl -s -f -o /dev/null http://localhost:8080/actuator/health 2>/dev/null; then
+        if docker exec quote-rest-api wget -q --spider http://localhost:8080/actuator/health >/dev/null 2>&1; then
             echo -e "${GREEN}✓ Spring Boot App is ready${NC}"
             return 0
         fi
