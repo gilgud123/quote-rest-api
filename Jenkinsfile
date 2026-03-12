@@ -15,7 +15,7 @@ pipeline {
         string(
             name: 'BRANCH_NAME',
             defaultValue: 'main',
-            description: 'Git branch to checkout and test'
+            description: 'Git branch name to checkout and test (e.g., main, develop, feature/new-api). Do NOT include "origin/" prefix.'
         )
         choice(
             name: 'MAVEN_PROFILE',

@@ -68,114 +68,114 @@ Choose one or both:
 
 ---
 
-#### Adding Build Parameters (Optional)
+#### Adding Build Parameters (Recommended)
 
-Parameters allow you to customize builds at runtime, such as selecting which branch to build or passing configuration values.
+The pipeline includes built-in parameters defined in the Jenkinsfile itself. No additional Jenkins configuration required!
 
-**Step 1: Enable Parameters**
+**Built-in Parameters** (automatically available):
 
-In the **General** section:
-1. ✅ Check **This project is parameterized**
-2. Click **Add Parameter** to add one or more parameters
+1. **BRANCH_NAME** (String Parameter)
+   - Default Value: `main`
+   - Description: `Git branch name to checkout and test`
+   - **How to use**: Enter just the branch name (e.g., `jenkins-setup`, `develop`, `feature/new-api`)
+   - **⚠️ IMPORTANT**: Do NOT include "origin/" prefix - just the branch name
 
-**Step 2: Add Parameters**
+2. **MAVEN_PROFILE** (Choice Parameter)
+   - Choices: `default`, `dev`, `prod`
+   - Description: `Maven profile to use for the build`
+   - Default: `default`
 
-Common parameter types:
+**How It Works**:
+- Parameters are defined directly in `Jenkinsfile` using the `parameters` block
+- On first build, Jenkins uses default values
+- From second build onwards, **Build with Parameters** button appears
+- No manual parameter configuration needed in Jenkins UI!
 
-**Git Parameter** (for branch selection - recommended):
-- **Requires Plugin**: Install "Git Parameter" plugin first (see instructions below)
-- Parameter Type: `Branch or Tag`
-- Name: `BRANCH_NAME`
-- Default Value: `origin/jenkins-setup` (or your default branch)
-- Description: `Git branch to build`
-- Branch Filter: (leave blank for all branches)
-- **Advanced Options** (expand):
-  - Tag Filter: (leave blank)
-  - Sort Mode: `DESCENDING_SMART` (optional - shows recent branches first)
-  - Selected Value: `TOP` (uses default value)
-  - **Branch Filter**: `origin/.*` (important - filters to show only remote branches)
+**Example Jenkinsfile parameters block**:
+```groovy
+pipeline {
+    parameters {
+        string(
+            name: 'BRANCH_NAME',
+            defaultValue: 'main',
+            description: 'Git branch name to checkout and test (e.g., main, develop, feature/new-api). Do NOT include "origin/" prefix.'
+        )
+        choice(
+            name: 'MAVEN_PROFILE',
+            choices: ['default', 'dev', 'prod'],
+            description: 'Maven profile to use for the build'
+        )
+    }
+    // ... rest of pipeline
+}
+```
 
-**Important Configuration**:
-- Parameter Type MUST be `Branch or Tag` (NOT just "Branch")
-- Branch Filter helps show only remote branches from origin
-- Default value should include `origin/` prefix (e.g., `origin/jenkins-setup`)
+**Adding Custom Parameters**:
 
-**Installing Git Parameter Plugin:**
-1. Go to **Manage Jenkins** (left sidebar)
-2. Click **Plugins**
-3. Click **Available plugins** tab
-4. Search for: `Git Parameter`
-5. Check the box next to "Git Parameter"
-6. Click **Install**
-7. After installation, restart Jenkins: **Manage Jenkins** → **Restart Safely**
-8. Return to your job configuration and add the Git Parameter
+If you need additional parameters, edit the `parameters` block in your Jenkinsfile:
 
-**Alternative: String Parameter** (if you don't want to install the plugin):
-- Name: `BRANCH_NAME`
-- Default Value: `main`
-- Description: `Git branch to build (e.g., main, develop, feature/xyz)`
-- **Note**: User must type branch name manually
+**String Parameter**:
+```groovy
+string(
+    name: 'VERSION',
+    defaultValue: '1.0.0',
+    description: 'Application version number'
+)
+```
 
-**String Parameter** (for versions, tags, custom values):
-- Name: `VERSION`
-- Default Value: `1.0.0`
-- Description: `Application version number`
+**Choice Parameter**:
+```groovy
+choice(
+    name: 'ENVIRONMENT',
+    choices: ['development', 'staging', 'production'],
+    description: 'Target environment for deployment'
+)
+```
 
-**Choice Parameter** (dropdown selection):
-- Name: `ENVIRONMENT`
-- Choices (one per line):
-  ```
-  development
-  staging
-  production
-  ```
-- Description: `Target environment for deployment`
+**Boolean Parameter**:
+```groovy
+booleanParam(
+    name: 'SKIP_TESTS',
+    defaultValue: false,
+    description: 'Skip unit and integration tests'
+)
+```
 
-**Boolean Parameter** (checkbox):
-- Name: `RUN_TESTS`
-- Default: ✅ Checked
-- Description: `Run unit and integration tests`
+**⚠️ Git Parameter Plugin NOT Recommended**:
+- While Git Parameter plugin offers a dropdown of branches, it has complex configuration
+- It causes issues with branch name formatting (origin/ prefix problems)
+- Simple String parameter is more reliable and user-friendly
+- Users can easily copy-paste branch names from Git/GitHub
 
-**Step 3: Use Parameters in Pipeline**
+**Pipeline Configuration for Branch Parameter**:
 
-**IMPORTANT: Update Branch Specifier**
+The Jenkinsfile includes a custom checkout stage that handles branch selection:
 
-After adding the BRANCH_NAME parameter, you MUST update the Pipeline configuration:
+```groovy
+stage('Checkout') {
+    steps {
+        echo "📦 Checking out branch: ${params.BRANCH_NAME}"
+        script {
+            // Clean branch name (remove origin/ prefix if present)
+            def branchName = params.BRANCH_NAME.replaceAll(/^origin\//, '')
+            checkout([
+                $class: 'GitSCM',
+                branches: [[name: "*/${branchName}"]],
+                userRemoteConfigs: scm.userRemoteConfigs,
+                extensions: [[$class: 'CloneOption', depth: 0, noTags: false, shallow: false]]
+            ])
+        }
+        sh 'git log -1 --oneline'
+        sh "echo 'Testing branch: ${params.BRANCH_NAME}'"
+    }
+}
+```
 
-1. Scroll to **Pipeline** section → **Branches to build**
-2. Update **Branch Specifier** based on parameter type:
-
-**If using Git Parameter with "Branch or Tag" type:**
-- Branch Specifier: `${BRANCH_NAME}`
-- The parameter returns the full reference (e.g., `origin/jenkins-setup`)
-- Jenkins will correctly resolve this to `refs/remotes/origin/jenkins-setup`
-
-**If using String Parameter:**
-- Branch Specifier: `*/${BRANCH_NAME}`
-- User must type branch name without "origin/" prefix (e.g., just `jenkins-setup`)
-- Jenkins will expand this to `*/jenkins-setup` matching any remote
-
-3. Click **Save**
-
-**Testing the Configuration:**
-- Click **Build with Parameters**
-- Select your branch from the dropdown (e.g., `origin/jenkins-setup`)
-- Click **Build**
-- If you get "couldn't find remote ref" error, verify the Branch Specifier is exactly `${BRANCH_NAME}`
-
-**Example: Multiple Parameters**
-
-You can add several parameters for flexible builds:
-
-1. **BRANCH_NAME** (Git Parameter - Branch): `origin/main` - Branch to build
-2. **SKIP_TESTS** (Boolean): unchecked - Skip test execution
-3. **DOCKER_TAG** (String): `latest` - Docker image tag
-4. **DEPLOY** (Boolean): unchecked - Deploy after build
-
-**Note**: If you don't see "Git Parameter" in the parameter types:
-1. The "Git Parameter" plugin is not installed
-2. Follow the installation steps in Step 2 above
-3. You can use a String Parameter as an alternative (user types branch name manually)
+This stage:
+- Accepts branch name with or without "origin/" prefix
+- Automatically cleans the branch name
+- Performs a full clone for reliable checkout
+- Displays the commit being tested
 
 **Using Parameters in Jenkinsfile**
 
@@ -184,6 +184,11 @@ Access parameters in your Jenkinsfile with `${params.PARAMETER_NAME}`:
 ```groovy
 pipeline {
     agent any
+    
+    parameters {
+        string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Branch to build')
+        booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip tests')
+    }
     
     stages {
         stage('Build') {
@@ -201,11 +206,22 @@ pipeline {
 
 **Building with Parameters**
 
-Once parameters are added:
-1. The **Build Now** button changes to **Build with Parameters**
-2. Click it to see a form with your parameters
-3. Modify values as needed
-4. Click **Build** to start
+**First Build**:
+1. Click **Build Now** - uses default parameter values
+2. After first build completes, the button changes to **Build with Parameters**
+
+**Subsequent Builds**:
+1. Click **Build with Parameters**
+2. A form appears with your parameters
+3. **For BRANCH_NAME**: Enter just the branch name
+   - ✅ Correct: `jenkins-setup`, `main`, `feature/new-api`
+   - ❌ Wrong: `origin/jenkins-setup` (no origin/ prefix needed)
+4. Modify other parameters as needed
+5. Click **Build** to start
+
+**Example Build Parameters**:
+- **BRANCH_NAME**: `jenkins-setup` (to test jenkins-setup branch)
+- **MAVEN_PROFILE**: `dev` (to use development profile)
 
 ---
 
@@ -401,23 +417,36 @@ post {
 
 **Problem**: Build fails with "fatal: couldn't find remote ref refs/heads/origin/jenkins-setup"
 
-**Cause**: Git Parameter is misconfigured, causing Jenkins to look for the wrong branch reference.
+**Cause**: Branch parameter includes "origin/" prefix when it shouldn't.
 
 **Solution**:
-1. Go to job → **Configure** → **General** section
-2. Find the **BRANCH_NAME** parameter
-3. Verify these settings:
-   - Parameter Type: `Branch or Tag` (NOT just "Branch")
-   - Default Value: `origin/jenkins-setup` (include origin/ prefix)
-   - Branch Filter: `origin/.*` (optional but helpful)
-4. Go to **Pipeline** section
-5. Branch Specifier should be: `${BRANCH_NAME}` (exactly as shown)
-6. Click **Save** and rebuild
+1. When using **Build with Parameters**, enter ONLY the branch name:
+   - ✅ Correct: `jenkins-setup`
+   - ❌ Wrong: `origin/jenkins-setup`
+   
+2. The Jenkinsfile automatically adds the origin/ prefix during checkout
 
-**If still failing**:
-- Try using a fixed branch first: Set Branch Specifier to `*/jenkins-setup`
-- Click **Build Now** (without parameters)
-- If that works, the Git Parameter configuration needs adjustment
+3. If you accidentally entered `origin/jenkins-setup`:
+   - Click **Build with Parameters** again
+   - Change `BRANCH_NAME` to just `jenkins-setup`
+   - Click **Build**
+
+**Why This Happens**:
+- The parameter field accepts plain branch names
+- The checkout stage automatically formats it as `*/jenkins-setup`
+- Git resolves this to `refs/remotes/origin/jenkins-setup`
+- Adding "origin/" manually causes double prefix: `origin/origin/jenkins-setup` ❌
+
+**Verification**:
+Check the Console Output - you should see:
+```
+📦 Checking out branch: jenkins-setup
+Testing branch: jenkins-setup
+```
+Not:
+```
+📦 Checking out branch: origin/jenkins-setup  ❌
+```
 
 ### Build Fails at "Checkout" Stage
 
