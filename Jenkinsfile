@@ -76,13 +76,17 @@ pipeline {
         
         stage('Checkout') {
             steps {
-                echo "📦 Checking out branch: ${params.BRANCH_NAME}"
                 script {
+                    // Use params.BRANCH_NAME if available (from git parameter), otherwise use scm branch
+                    def branchName = params.BRANCH_NAME ?: env.GIT_BRANCH ?: 'jenkins-setup'
+                    
+                    echo "📦 Checking out branch: ${branchName}"
+                    
                     // Git Parameter returns format like "origin/jenkins-setup"
                     // Extract just the branch name part after the last /
-                    def branchName = params.BRANCH_NAME.contains('/') ? 
-                        params.BRANCH_NAME.substring(params.BRANCH_NAME.lastIndexOf('/') + 1) : 
-                        params.BRANCH_NAME
+                    if (branchName.contains('/')) {
+                        branchName = branchName.substring(branchName.lastIndexOf('/') + 1)
+                    }
                     
                     echo "Using branch name: ${branchName}"
                     
@@ -94,7 +98,7 @@ pipeline {
                     ])
                 }
                 sh 'git log -1 --oneline'
-                sh "echo 'Successfully checked out: ${params.BRANCH_NAME}'"
+                sh "echo 'Successfully checked out branch'"
             }
         }
 
