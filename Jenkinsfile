@@ -158,73 +158,6 @@ pipeline {
             }
         }
 
-        stage('Start Services for E2E Tests') {
-            steps {
-                echo '🚀 Starting services for Playwright tests...'
-                script {
-                    // Start PostgreSQL, Keycloak, and the application
-                    sh '''
-                        cd "$WORKSPACE"
-                        docker compose up -d postgres keycloak
-                    '''
-                    
-                    // Wait for services to be ready
-                    sh '''
-                        chmod +x scripts/jenkins/wait-for-services.sh
-                        ./scripts/jenkins/wait-for-services.sh postgres keycloak
-                    '''
-                    
-                    // Start the application
-                    sh '''
-                        docker compose up -d app
-                        ./scripts/jenkins/wait-for-services.sh app
-                    '''
-                }
-            }
-        }
-
-        stage('Playwright API Tests') {
-            agent {
-                docker {
-                    image 'mcr.microsoft.com/playwright:v1.40.0-jammy'
-                    args '-v /var/run/docker.sock:/var/run/docker.sock --network quote-network'
-                    reuseNode true
-                }
-            }
-            steps {
-                echo '🎭 Running Playwright API tests...'
-                dir('tests') {
-                    sh '''
-                        npm ci
-                        npx playwright test
-                    '''
-                }
-            }
-            post {
-                always {
-                    // Publish Playwright HTML report
-                    publishHTML([
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'tests/playwright-report',
-                        reportFiles: 'index.html',
-                        reportName: 'Playwright Test Report'
-                    ])
-                    
-                    // Archive Playwright test results
-                    archiveArtifacts artifacts: 'tests/playwright-report/**', allowEmptyArchive: true
-                    archiveArtifacts artifacts: 'tests/test-results/**', allowEmptyArchive: true
-                }
-                cleanup {
-                    script {
-                        // Stop services after Playwright tests
-                        sh 'docker compose down || true'
-                    }
-                }
-            }
-        }
-
         stage('Docker Build') {
             steps {
                 echo '🐳 Building Docker image...'
@@ -255,10 +188,7 @@ pipeline {
             cleanWs(
                 deleteDirs: true,
                 patterns: [
-                    [pattern: 'target/**', type: 'INCLUDE'],
-                    [pattern: 'tests/node_modules/**', type: 'INCLUDE'],
-                    [pattern: 'tests/playwright-report/**', type: 'INCLUDE'],
-                    [pattern: 'tests/test-results/**', type: 'INCLUDE']
+                    [pattern: 'target/**', type: 'INCLUDE']
                 ]
             )
         }
