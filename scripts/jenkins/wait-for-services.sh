@@ -56,23 +56,9 @@ wait_for_postgres() {
 }
 
 wait_for_keycloak() {
-    local elapsed=0
-    
-    echo -e "${YELLOW}Waiting for Keycloak...${NC}"
-    
-    while [ $elapsed -lt $TIMEOUT ]; do
-        if docker exec quote-keycloak curl -s -f -o /dev/null http://localhost:8080/health/live 2>/dev/null; then
-            echo -e "${GREEN}✓ Keycloak is ready${NC}"
-            return 0
-        fi
-        
-        echo -e "${YELLOW}  Waiting... (${elapsed}s/${TIMEOUT}s)${NC}"
-        sleep $INTERVAL
-        elapsed=$((elapsed + INTERVAL))
-    done
-    
-    echo -e "${RED}✗ Keycloak failed to become ready within ${TIMEOUT}s${NC}"
-    return 1
+    # Use host curl to probe the Keycloak health endpoint exposed on localhost.
+    # This avoids relying on curl being installed inside the Keycloak container.
+    wait_for_url "http://localhost:8081/health/live" "Keycloak"
 }
 
 wait_for_app() {
