@@ -11,16 +11,6 @@ pipeline {
         }
     }
 
-    parameters {
-        // This parameter is overridden by Git Parameter plugin configured in Jenkins UI
-        // Do not remove this block - it tells Jenkins to expect parameters
-        string(
-            name: 'BRANCH_NAME',
-            defaultValue: 'master',
-            description: 'Branch to test (configured via Git Parameter plugin in Jenkins UI)'
-        )
-    }
-
     environment {
         // Maven options (MaxPermSize removed - not needed in Java 17+)
         MAVEN_OPTS = '-Xmx1024m'
