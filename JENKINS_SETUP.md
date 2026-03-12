@@ -1,5 +1,13 @@
 # Jenkins CI/CD Setup Guide
 
+> ⚠️ **Local Development Only**
+> The Jenkins configuration in this repository is intended **exclusively for local developer workstations**.
+> It mounts the host Docker socket so Jenkins can run Docker builds — this grants the container
+> significant access to the host Docker daemon.  **Do not deploy this configuration to a shared,
+> internet-facing, or production environment.**  For production CI/CD, use a cloud-native pipeline
+> (GitHub Actions, GitLab CI, etc.) or a hardened Jenkins installation with dedicated agent nodes
+> and a properly scoped service account.
+
 This guide provides step-by-step instructions for setting up Jenkins for the Quote REST API project.
 
 ## Table of Contents
@@ -329,7 +337,11 @@ docker exec quote-jenkins cat /var/jenkins_home/secrets/initialAdminPassword
    volumes:
      - /var/run/docker.sock:/var/run/docker.sock
    ```
-3. On Linux, add Jenkins user to docker group (not needed on Windows)
+3. On Linux the jenkins user must belong to the `docker` group.  Add the following to your `Dockerfile.jenkins` so the user is granted access at image build time:
+   ```dockerfile
+   RUN groupadd -f docker && usermod -aG docker jenkins
+   ```
+   Then rebuild the image: `docker compose build jenkins && docker compose up -d jenkins`
 
 ### Plugin Installation Fails
 

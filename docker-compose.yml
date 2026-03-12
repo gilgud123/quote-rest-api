@@ -84,14 +84,19 @@ services:
     restart: unless-stopped
 
   # Jenkins CI/CD Server
+  # ⚠️  FOR LOCAL DEVELOPMENT ONLY — do NOT use this configuration in production.
+  # The Docker socket is mounted to allow Jenkins to run Docker builds locally.
+  # Access to the Docker socket grants significant host-level privileges; ensure
+  # Docker Desktop is protected by your host OS user account.
   jenkins:
     build:
       context: .
       dockerfile: Dockerfile.jenkins
     image: quote-jenkins:latest
     container_name: quote-jenkins
-    privileged: true
-    user: root
+    # Run as the default jenkins user (uid 1000) rather than root to reduce
+    # the blast radius of a compromised container.  The Dockerfile.jenkins must
+    # add the jenkins user to the docker group so it can reach the socket.
     environment:
       DOCKER_HOST: unix:///var/run/docker.sock
     ports:
@@ -99,8 +104,10 @@ services:
       - "50000:50000" # Jenkins agent port
     volumes:
       - jenkins-data:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock # Docker-in-Docker
-      - ./:/workspace # Mount project directory
+      # Mounting the Docker socket allows local Docker builds but grants
+      # the jenkins user access to all containers on the host daemon.
+      # Keep this setup restricted to developer workstations.
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - quote-network
     restart: unless-stopped
