@@ -1,0 +1,60 @@
+<div class="quote-list-container">
+  <div class="header">
+    <h1>Quotes</h1>
+    <button class="btn-primary" (click)="createQuote()">Add New Quote</button>
+  </div>
+
+  @if (loading) {
+  <div class="loading">Loading quotes...</div>
+  } @if (error) {
+  <div class="error">{{ error }}</div>
+  } @if (!loading && !error) {
+  <table class="quotes-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Text</th>
+        <th>Author</th>
+        <th>Context</th>
+        <th>Category</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (quote of quotes; track quote.id) {
+      <tr>
+        <td>{{ quote.id }}</td>
+        <td class="quote-text">{{ quote.text }}</td>
+        <td>{{ quote.authorName || 'Unknown' }}</td>
+        <td>{{ quote.context || '-' }}</td>
+        <td>{{ quote.category || '-' }}</td>
+        <td class="actions">
+          <button class="btn-icon btn-edit" (click)="editQuote(quote)" title="Edit">✏️</button>
+          <button class="btn-icon btn-delete" (click)="openDeleteDialog(quote)" title="Delete">
+            🗑️
+          </button>
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+
+  <div class="pagination">
+    <button (click)="previousPage()" [disabled]="!hasPreviousPage">Previous</button>
+    <span class="page-info">
+      Showing {{ currentPageStart }} - {{ currentPageEnd }} of {{ totalElements }}
+    </span>
+    <button (click)="nextPage()" [disabled]="!hasNextPage">Next</button>
+  </div>
+  } @if (showDeleteDialog && quoteToDelete) {
+  <div class="dialog-overlay" (click)="cancelDelete()">
+    <div class="dialog-wrapper" (click)="$event.stopPropagation()">
+      <app-quote-delete-dialog
+        [quote]="quoteToDelete"
+        (confirm)="confirmDelete()"
+        (cancel)="cancelDelete()"
+      ></app-quote-delete-dialog>
+    </div>
+  </div>
+  }
+</div>
