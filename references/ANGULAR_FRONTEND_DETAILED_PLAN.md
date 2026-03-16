@@ -1092,52 +1092,42 @@ export interface QuotePage {
 Edit `frontend/src/app/app.config.ts`:
 
 ```typescript
-import { ApplicationConfig, APP_INITIALIZER } from '@angular/core';
+import { ApplicationConfig, provideAppInitializer, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { KeycloakService } from 'keycloak-angular';
+import { provideClientHydration } from '@angular/platform-browser';
+import Keycloak from 'keycloak-js';
 
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 
-function initializeKeycloak(keycloak: KeycloakService) {
-  return () =>
-    keycloak.init({
-      config: {
-        url: environment.keycloak.url,
-        realm: environment.keycloak.realm,
-        clientId: environment.keycloak.clientId
-      },
-      initOptions: {
-        onLoad: 'check-sso',
-        silentCheckSsoRedirectUri:
-          window.location.origin + '/assets/silent-check-sso.html',
-        checkLoginIframe: false
-      },
-      enableBearerInterceptor: true,
-      bearerPrefix: 'Bearer',
-      bearerExcludedUrls: ['/assets']
-    });
+export let keycloak: Keycloak;
+
+function initializeKeycloak(): Promise<boolean> {
+  keycloak = new Keycloak({
+    url: environment.keycloak.url,
+    realm: environment.keycloak.realm,
+    clientId: environment.keycloak.clientId,
+  });
+
+  return keycloak.init({
+    onLoad: 'check-sso',
+    silentCheckSsoRedirectUri: window.location.origin + '/assets/silent-check-sso.html',
+    checkLoginIframe: false,
+    pkceMethod: 'S256',
+  });
 }
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient(
-      withInterceptors([authInterceptor, errorInterceptor])
-    ),
-    provideAnimationsAsync(),
-    KeycloakService,
-    {
-      provide: APP_INITIALIZER,
-      useFactory: initializeKeycloak,
-      multi: true,
-      deps: [KeycloakService]
-    }
-  ]
+    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
+    provideClientHydration(),
+    provideAppInitializer(initializeKeycloak),
+  ],
 };
 ```
 
@@ -1147,46 +1137,72 @@ Create `frontend/src/app/core/services/auth.service.ts`:
 
 ```typescript
 import { Injectable } from '@angular/core';
-import { KeycloakService } from 'keycloak-angular';
 import { KeycloakProfile } from 'keycloak-js';
+import { keycloak } from '../../app.config';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  constructor(private keycloak: KeycloakService) {}
-
   async isLoggedIn(): Promise<boolean> {
-    return await this.keycloak.isLoggedIn();
+    return keycloak?.authenticated ?? false;
   }
 
   async getUserProfile(): Promise<KeycloakProfile | null> {
-    return await this.keycloak.loadUserProfile();
+    if (!keycloak || !keycloak.authenticated) {
+      return null;
+    }
+    try {
+      return await keycloak.loadUserProfile();
+    } catch (error) {
+      console.error('Failed to load user profile:', error);
+      return null;
+    }
   }
 
   async getUsername(): Promise<string> {
     const profile = await this.getUserProfile();
-    return profile?.username || 'Unknown User';
+    return profile?.username || keycloak?.tokenParsed?.['preferred_username'] || 'Unknown User';
   }
 
   login(): void {
-    this.keycloak.login();
+    keycloak?.login();
   }
 
   logout(): void {
-    this.keycloak.logout(window.location.origin);
+    keycloak?.logout({ redirectUri: window.location.origin });
   }
 
   getRoles(): string[] {
-    return this.keycloak.getUserRoles();
+    return keycloak?.realmAccess?.roles ?? [];
   }
 
   hasRole(role: string): boolean {
     return this.getRoles().includes(role);
   }
 
-  getToken(): Promise<string> {
-    return this.keycloak.getToken();
+  async getToken(): Promise<string> {
+    try {
+      await keycloak?.updateToken(5);
+      return keycloak?.token ?? '';
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+      return '';
+    }
+  }
+
+  getTokenParsed() {
+    return keycloak?.tokenParsed;
+  }
+
+  async refreshToken(): Promise<boolean> {
+    try {
+      const refreshed = await keycloak?.updateToken(30);
+      return refreshed ?? false;
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+      return false;
+    }
   }
 }
 ```
@@ -1198,16 +1214,15 @@ Create `frontend/src/app/core/guards/auth.guard.ts`:
 ```typescript
 import { inject } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
-import { KeycloakService } from 'keycloak-angular';
+import { keycloak } from '../../app.config';
 
 export const authGuard: CanActivateFn = async (route, state) => {
-  const keycloak = inject(KeycloakService);
   const router = inject(Router);
 
-  const isLoggedIn = await keycloak.isLoggedIn();
+  const isLoggedIn = keycloak?.authenticated ?? false;
 
   if (!isLoggedIn) {
-    await keycloak.login({
+    await keycloak?.login({
       redirectUri: window.location.origin + state.url
     });
     return false;
@@ -1216,7 +1231,7 @@ export const authGuard: CanActivateFn = async (route, state) => {
   // Optional: Check for required roles
   const requiredRoles = route.data['roles'] as string[];
   if (requiredRoles && requiredRoles.length > 0) {
-    const userRoles = keycloak.getUserRoles();
+    const userRoles = keycloak?.realmAccess?.roles ?? [];
     const hasRole = requiredRoles.some(role => userRoles.includes(role));
 
     if (!hasRole) {
@@ -1231,36 +1246,66 @@ export const authGuard: CanActivateFn = async (route, state) => {
 
 ### Step 3.6: Create HTTP Interceptors
 
-Create `frontend/src/app/core/interceptors/auth.interceptor.ts`:
+The auth interceptor is already created. Here's the updated version:
+
+`frontend/src/app/core/interceptors/auth.interceptor.ts`:
 
 ```typescript
 import { HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
-import { KeycloakService } from 'keycloak-angular';
-import { from, switchMap } from 'rxjs';
+import { keycloak } from '../../app.config';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const keycloak = inject(KeycloakService);
-
-  // Skip for assets
-  if (req.url.includes('/assets/')) {
+  // Skip adding token for assets and non-API requests
+  if (req.url.includes('/assets') || !req.url.includes('/api')) {
     return next(req);
   }
 
-  return from(keycloak.getToken()).pipe(
-    switchMap(token => {
-      if (token) {
-        const cloned = req.clone({
-          setHeaders: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        return next(cloned);
-      }
-      return next(req);
+  // Add Bearer token if authenticated
+  if (keycloak?.authenticated && keycloak?.token) {
+    const clonedRequest = req.clone({
+      setHeaders: {
+        Authorization: `Bearer ${keycloak.token}`,
+      },
+    });
+    return next(clonedRequest);
+  }
+
+  return next(req);
+};
+```
+
+`frontend/src/app/core/interceptors/error.interceptor.ts`:
+
+```typescript
+import { HttpInterceptorFn } from '@angular/common/http';
+import { catchError, throwError } from 'rxjs';
+
+export const errorInterceptor: HttpInterceptorFn = (req, next) => {
+  return next(req).pipe(
+    catchError((error) => {
+      // Error handling will be implemented later
+      console.error('HTTP Error:', error);
+      return throwError(() => error);
     })
   );
 };
+```
+
+        switchMap(token => {
+          if (token) {
+            const cloned = req.clone({
+              setHeaders: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            return next(cloned);
+          }
+          return next(req);
+        })
+
+);
+};
+
 ```
 
 Create `frontend/src/app/core/interceptors/error.interceptor.ts`:
