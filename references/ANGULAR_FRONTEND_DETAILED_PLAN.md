@@ -8,9 +8,10 @@
 4. [Phase 2: Angular Module Initialization](#phase-2-angular-module-initialization)
 5. [Phase 3: Core Infrastructure](#phase-3-core-infrastructure)
 6. [Phase 4: Feature Implementation](#phase-4-feature-implementation)
-7. [Phase 5: Integration & CI/CD](#phase-5-integration--cicd)
-8. [Testing Strategy](#testing-strategy)
-9. [Deployment Strategy](#deployment-strategy)
+7. [Phase 5: Testing](#phase-5-testing)
+8. [Phase 6: Integration & CI/CD](#phase-6-integration--cicd)
+9. [Testing Strategy](#testing-strategy)
+10. [Deployment Strategy](#deployment-strategy)
 
 ---
 
@@ -1710,9 +1711,810 @@ export const AUTHOR_ROUTES: Routes = [
 
 ---
 
-## Phase 5: Integration & CI/CD
+## Phase 5: Testing
 
-### Step 5.1: Frontend Development Workflow
+### Step 5.1: Unit Tests for Core Services
+
+**Create test for AuthService:**
+
+Create `frontend/src/app/core/services/auth.service.spec.ts`:
+
+```typescript
+import { TestBed } from '@angular/core/testing';
+import { AuthService } from './auth.service';
+
+describe('AuthService', () => {
+  let service: AuthService;
+  let mockKeycloak: any;
+
+  beforeEach(() => {
+    // Mock Keycloak instance
+    mockKeycloak = {
+      authenticated: true,
+      tokenParsed: {
+        preferred_username: 'testuser',
+        email: 'test@example.com',
+        given_name: 'Test',
+        family_name: 'User',
+        realm_access: { roles: ['USER', 'ADMIN'] }
+      },
+      token: 'mock-token',
+      login: jasmine.createSpy('login').and.returnValue(Promise.resolve()),
+      logout: jasmine.createSpy('logout').and.returnValue(Promise.resolve()),
+      updateToken: jasmine.createSpy('updateToken').and.returnValue(Promise.resolve(true))
+    };
+
+    TestBed.configureTestingModule({
+      providers: [AuthService]
+    });
+    service = TestBed.inject(AuthService);
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+
+  it('should check if user is logged in', () => {
+    expect(service.isLoggedIn()).toBe(true);
+  });
+
+  it('should get user profile', () => {
+    const profile = service.getUserProfile();
+    expect(profile).toBeDefined();
+    expect(profile?.username).toBe('testuser');
+    expect(profile?.email).toBe('test@example.com');
+  });
+
+  it('should get user roles', () => {
+    const roles = service.getRoles();
+    expect(roles).toContain('USER');
+    expect(roles).toContain('ADMIN');
+  });
+
+  it('should check if user has role', () => {
+    expect(service.hasRole('USER')).toBe(true);
+    expect(service.hasRole('ADMIN')).toBe(true);
+    expect(service.hasRole('SUPERADMIN')).toBe(false);
+  });
+
+  it('should get token', () => {
+    expect(service.getToken()).toBe('mock-token');
+  });
+});
+```
+
+**Create test for ApiService:**
+
+Create `frontend/src/app/core/services/api.service.spec.ts`:
+
+```typescript
+import { TestBed } from '@angular/core/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { ApiService } from './api.service';
+import { environment } from '../../../environments/environment';
+
+describe('ApiService', () => {
+  let service: ApiService;
+  let httpMock: HttpTestingController;
+  const apiUrl = environment.apiUrl;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        ApiService,
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
+    });
+    service = TestBed.inject(ApiService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+
+  it('should make GET request', () => {
+    const mockData = { id: 1, name: 'Test' };
+    
+    service.get<any>('/test').subscribe(data => {
+      expect(data).toEqual(mockData);
+    });
+
+    const req = httpMock.expectOne(`${apiUrl}/test`);
+    expect(req.request.method).toBe('GET');
+    req.flush(mockData);
+  });
+
+  it('should make GET request with query params', () => {
+    const params = { page: 0, size: 10 };
+    
+    service.get<any>('/test', params).subscribe();
+
+    const req = httpMock.expectOne(`${apiUrl}/test?page=0&size=10`);
+    expect(req.request.method).toBe('GET');
+    req.flush({});
+  });
+
+  it('should make POST request', () => {
+    const postData = { name: 'New Item' };
+    const mockResponse = { id: 1, ...postData };
+    
+    service.post<any>('/test', postData).subscribe(data => {
+      expect(data).toEqual(mockResponse);
+    });
+
+    const req = httpMock.expectOne(`${apiUrl}/test`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(postData);
+    req.flush(mockResponse);
+  });
+
+  it('should make PUT request', () => {
+    const putData = { id: 1, name: 'Updated Item' };
+    
+    service.put<any>('/test/1', putData).subscribe(data => {
+      expect(data).toEqual(putData);
+    });
+
+    const req = httpMock.expectOne(`${apiUrl}/test/1`);
+    expect(req.request.method).toBe('PUT');
+    req.flush(putData);
+  });
+
+  it('should make DELETE request', () => {
+    service.delete<void>('/test/1').subscribe();
+
+    const req = httpMock.expectOne(`${apiUrl}/test/1`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+  });
+
+  it('should filter null/undefined query params', () => {
+    const params = { page: 0, size: null, filter: undefined };
+    
+    service.get<any>('/test', params).subscribe();
+
+    const req = httpMock.expectOne(`${apiUrl}/test?page=0`);
+    expect(req.request.method).toBe('GET');
+    req.flush({});
+  });
+});
+```
+
+### Step 6.2: Unit Tests for Feature Services
+
+**Create test for AuthorService:**
+
+Create `frontend/src/app/features/authors/services/author.service.spec.ts`:
+
+```typescript
+import { TestBed } from '@angular/core/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { AuthorService } from './author.service';
+import { Author, AuthorPage } from '../../../core/models';
+import { environment } from '../../../../environments/environment';
+
+describe('AuthorService', () => {
+  let service: AuthorService;
+  let httpMock: HttpTestingController;
+  const apiUrl = environment.apiUrl;
+
+  const mockAuthor: Author = {
+    id: 1,
+    name: 'Socrates',
+    biography: 'Ancient Greek philosopher',
+    birthYear: -469,
+    deathYear: -399
+  };
+
+  const mockAuthorPage: AuthorPage = {
+    content: [mockAuthor],
+    totalElements: 1,
+    totalPages: 1,
+    size: 10,
+    number: 0
+  };
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        AuthorService,
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
+    });
+    service = TestBed.inject(AuthorService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+
+  it('should get authors with pagination', () => {
+    service.getAuthors(0, 10, 'name,asc').subscribe(page => {
+      expect(page).toEqual(mockAuthorPage);
+      expect(page.content.length).toBe(1);
+    });
+
+    const req = httpMock.expectOne(`${apiUrl}/authors?page=0&size=10&sort=name,asc`);
+    expect(req.request.method).toBe('GET');
+    req.flush(mockAuthorPage);
+  });
+
+  it('should get single author by id', () => {
+    service.getAuthor(1).subscribe(author => {
+      expect(author).toEqual(mockAuthor);
+    });
+
+    const req = httpMock.expectOne(`${apiUrl}/authors/1`);
+    expect(req.request.method).toBe('GET');
+    req.flush(mockAuthor);
+  });
+
+  it('should create new author', () => {
+    const newAuthor: Author = {
+      name: 'Plato',
+      biography: 'Student of Socrates',
+      birthYear: -428,
+      deathYear: -348
+    };
+
+    service.createAuthor(newAuthor).subscribe(author => {
+      expect(author.id).toBe(2);
+      expect(author.name).toBe('Plato');
+    });
+
+    const req = httpMock.expectOne(`${apiUrl}/authors`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(newAuthor);
+    req.flush({ id: 2, ...newAuthor });
+  });
+
+  it('should update existing author', () => {
+    const updatedAuthor: Author = { ...mockAuthor, biography: 'Updated biography' };
+
+    service.updateAuthor(1, updatedAuthor).subscribe(author => {
+      expect(author.biography).toBe('Updated biography');
+    });
+
+    const req = httpMock.expectOne(`${apiUrl}/authors/1`);
+    expect(req.request.method).toBe('PUT');
+    req.flush(updatedAuthor);
+  });
+
+  it('should delete author', () => {
+    service.deleteAuthor(1).subscribe();
+
+    const req = httpMock.expectOne(`${apiUrl}/authors/1`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+  });
+
+  it('should search authors by name', () => {
+    service.searchAuthors('Socrates', 0, 10).subscribe(page => {
+      expect(page.content[0].name).toBe('Socrates');
+    });
+
+    const req = httpMock.expectOne(`${apiUrl}/authors/search?name=Socrates&page=0&size=10`);
+    expect(req.request.method).toBe('GET');
+    req.flush(mockAuthorPage);
+  });
+});
+```
+
+### Step 6.3: Component Tests
+
+**Create test for AuthorList component:**
+
+Create `frontend/src/app/features/authors/components/author-list/author-list.spec.ts`:
+
+```typescript
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { of, throwError } from 'rxjs';
+import { AuthorList } from './author-list';
+import { AuthorService } from '../../services/author.service';
+import { Author, AuthorPage } from '../../../../core/models';
+
+describe('AuthorList', () => {
+  let component: AuthorList;
+  let fixture: ComponentFixture<AuthorList>;
+  let authorService: jasmine.SpyObj<AuthorService>;
+
+  const mockAuthorPage: AuthorPage = {
+    content: [
+      { id: 1, name: 'Socrates', biography: 'Greek philosopher', birthYear: -469, deathYear: -399 },
+      { id: 2, name: 'Plato', biography: 'Student of Socrates', birthYear: -428, deathYear: -348 }
+    ],
+    totalElements: 2,
+    totalPages: 1,
+    size: 10,
+    number: 0
+  };
+
+  beforeEach(async () => {
+    const authorServiceSpy = jasmine.createSpyObj('AuthorService', [
+      'getAuthors',
+      'getAuthor',
+      'createAuthor',
+      'updateAuthor',
+      'deleteAuthor',
+      'searchAuthors'
+    ]);
+
+    await TestBed.configureTestingModule({
+      imports: [AuthorList],
+      providers: [
+        { provide: AuthorService, useValue: authorServiceSpy },
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
+    }).compileComponents();
+
+    authorService = TestBed.inject(AuthorService) as jasmine.SpyObj<AuthorService>;
+    fixture = TestBed.createComponent(AuthorList);
+    component = fixture.componentInstance;
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should load authors on init', () => {
+    authorService.getAuthors.and.returnValue(of(mockAuthorPage));
+
+    fixture.detectChanges(); // triggers ngOnInit
+
+    expect(authorService.getAuthors).toHaveBeenCalledWith(0, 10, 'name,asc');
+    expect(component.authors.length).toBe(2);
+    expect(component.totalElements).toBe(2);
+  });
+
+  it('should handle loading state', () => {
+    authorService.getAuthors.and.returnValue(of(mockAuthorPage));
+
+    expect(component.loading).toBe(false);
+    
+    component.loadAuthors();
+    expect(component.loading).toBe(true);
+
+    fixture.detectChanges();
+    fixture.whenStable().then(() => {
+      expect(component.loading).toBe(false);
+    });
+  });
+
+  it('should handle error when loading authors fails', () => {
+    const errorMessage = 'Failed to load authors';
+    authorService.getAuthors.and.returnValue(throwError(() => new Error('Server error')));
+
+    component.ngOnInit();
+
+    expect(component.error).toBe(errorMessage);
+    expect(component.loading).toBe(false);
+  });
+
+  it('should navigate to next page', () => {
+    authorService.getAuthors.and.returnValue(of(mockAuthorPage));
+    component.pageIndex = 0;
+    component.totalElements = 20;
+
+    component.nextPage();
+
+    expect(component.pageIndex).toBe(1);
+    expect(authorService.getAuthors).toHaveBeenCalled();
+  });
+
+  it('should not navigate to next page when on last page', () => {
+    component.pageIndex = 0;
+    component.pageSize = 10;
+    component.totalElements = 5;
+
+    const initialPage = component.pageIndex;
+    component.nextPage();
+
+    expect(component.pageIndex).toBe(initialPage);
+  });
+
+  it('should navigate to previous page', () => {
+    authorService.getAuthors.and.returnValue(of(mockAuthorPage));
+    component.pageIndex = 1;
+
+    component.previousPage();
+
+    expect(component.pageIndex).toBe(0);
+    expect(authorService.getAuthors).toHaveBeenCalled();
+  });
+
+  it('should not navigate to previous page when on first page', () => {
+    component.pageIndex = 0;
+
+    component.previousPage();
+
+    expect(component.pageIndex).toBe(0);
+  });
+
+  it('should calculate hasNextPage correctly', () => {
+    component.pageIndex = 0;
+    component.pageSize = 10;
+    component.totalElements = 20;
+    expect(component.hasNextPage).toBe(true);
+
+    component.totalElements = 5;
+    expect(component.hasNextPage).toBe(false);
+  });
+
+  it('should calculate hasPreviousPage correctly', () => {
+    component.pageIndex = 0;
+    expect(component.hasPreviousPage).toBe(false);
+
+    component.pageIndex = 1;
+    expect(component.hasPreviousPage).toBe(true);
+  });
+});
+```
+
+### Step 6.4: Guard Tests
+
+**Create test for Auth Guard:**
+
+Create `frontend/src/app/core/guards/auth.guard.spec.ts`:
+
+```typescript
+import { TestBed } from '@angular/core/testing';
+import { Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { authGuard } from './auth.guard';
+
+describe('authGuard', () => {
+  let router: jasmine.SpyObj<Router>;
+  let mockKeycloak: any;
+  let mockRoute: ActivatedRouteSnapshot;
+  let mockState: RouterStateSnapshot;
+
+  beforeEach(() => {
+    const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: Router, useValue: routerSpy }
+      ]
+    });
+
+    router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    mockRoute = {} as ActivatedRouteSnapshot;
+    mockState = { url: '/authors' } as RouterStateSnapshot;
+
+    // Mock keycloak instance
+    mockKeycloak = {
+      authenticated: true,
+      tokenParsed: {
+        realm_access: { roles: ['USER'] }
+      },
+      login: jasmine.createSpy('login')
+    };
+  });
+
+  it('should allow access when user is authenticated', () => {
+    const canActivate = TestBed.runInInjectionContext(() => 
+      authGuard(mockRoute, mockState)
+    );
+
+    expect(canActivate).toBe(true);
+  });
+
+  it('should redirect to login when user is not authenticated', () => {
+    mockKeycloak.authenticated = false;
+
+    const canActivate = TestBed.runInInjectionContext(() => 
+      authGuard(mockRoute, mockState)
+    );
+
+    expect(canActivate).toBe(false);
+    expect(mockKeycloak.login).toHaveBeenCalled();
+  });
+
+  it('should check required roles', () => {
+    mockRoute.data = { roles: ['ADMIN'] };
+    mockKeycloak.tokenParsed.realm_access.roles = ['USER'];
+
+    const canActivate = TestBed.runInInjectionContext(() => 
+      authGuard(mockRoute, mockState)
+    );
+
+    expect(canActivate).toBe(false);
+  });
+
+  it('should allow access when user has required role', () => {
+    mockRoute.data = { roles: ['ADMIN'] };
+    mockKeycloak.tokenParsed.realm_access.roles = ['USER', 'ADMIN'];
+
+    const canActivate = TestBed.runInInjectionContext(() => 
+      authGuard(mockRoute, mockState)
+    );
+
+    expect(canActivate).toBe(true);
+  });
+});
+```
+
+### Step 6.5: Interceptor Tests
+
+**Create test for Auth Interceptor:**
+
+Create `frontend/src/app/core/interceptors/auth.interceptor.spec.ts`:
+
+```typescript
+import { TestBed } from '@angular/core/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { HTTP_INTERCEPTORS, HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
+import { authInterceptor } from './auth.interceptor';
+
+describe('authInterceptor', () => {
+  let httpMock: HttpTestingController;
+  let httpClient: HttpClient;
+  let mockKeycloak: any;
+
+  beforeEach(() => {
+    mockKeycloak = {
+      authenticated: true,
+      token: 'mock-jwt-token'
+    };
+
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClientTesting()
+      ]
+    });
+
+    httpMock = TestBed.inject(HttpTestingController);
+    httpClient = TestBed.inject(HttpClient);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  it('should add Authorization header to API requests', () => {
+    httpClient.get('/api/v1/authors').subscribe();
+
+    const req = httpMock.expectOne('/api/v1/authors');
+    expect(req.request.headers.has('Authorization')).toBe(true);
+    expect(req.request.headers.get('Authorization')).toBe('Bearer mock-jwt-token');
+    req.flush({});
+  });
+
+  it('should not add Authorization header to non-API requests', () => {
+    httpClient.get('/assets/config.json').subscribe();
+
+    const req = httpMock.expectOne('/assets/config.json');
+    expect(req.request.headers.has('Authorization')).toBe(false);
+    req.flush({});
+  });
+
+  it('should not add Authorization header when not authenticated', () => {
+    mockKeycloak.authenticated = false;
+
+    httpClient.get('/api/v1/authors').subscribe();
+
+    const req = httpMock.expectOne('/api/v1/authors');
+    expect(req.request.headers.has('Authorization')).toBe(false);
+    req.flush({});
+  });
+});
+```
+
+**Create test for Error Interceptor:**
+
+Create `frontend/src/app/core/interceptors/error.interceptor.spec.ts`:
+
+```typescript
+import { TestBed } from '@angular/core/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
+import { errorInterceptor } from './error.interceptor';
+
+describe('errorInterceptor', () => {
+  let httpMock: HttpTestingController;
+  let httpClient: HttpClient;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(withInterceptors([errorInterceptor])),
+        provideHttpClientTesting()
+      ]
+    });
+
+    httpMock = TestBed.inject(HttpTestingController);
+    httpClient = TestBed.inject(HttpClient);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  it('should handle 401 Unauthorized error', (done) => {
+    httpClient.get('/api/v1/authors').subscribe({
+      error: (error) => {
+        expect(error.status).toBe(401);
+        done();
+      }
+    });
+
+    const req = httpMock.expectOne('/api/v1/authors');
+    req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+  });
+
+  it('should handle 403 Forbidden error', (done) => {
+    httpClient.get('/api/v1/authors').subscribe({
+      error: (error) => {
+        expect(error.status).toBe(403);
+        done();
+      }
+    });
+
+    const req = httpMock.expectOne('/api/v1/authors');
+    req.flush('Forbidden', { status: 403, statusText: 'Forbidden' });
+  });
+
+  it('should handle 404 Not Found error', (done) => {
+    httpClient.get('/api/v1/authors/999').subscribe({
+      error: (error) => {
+        expect(error.status).toBe(404);
+        done();
+      }
+    });
+
+    const req = httpMock.expectOne('/api/v1/authors/999');
+    req.flush('Not Found', { status: 404, statusText: 'Not Found' });
+  });
+
+  it('should handle 500 Server Error', (done) => {
+    httpClient.get('/api/v1/authors').subscribe({
+      error: (error) => {
+        expect(error.status).toBe(500);
+        done();
+      }
+    });
+
+    const req = httpMock.expectOne('/api/v1/authors');
+    req.flush('Internal Server Error', { status: 500, statusText: 'Internal Server Error' });
+  });
+});
+```
+
+### Step 6.6: Run Tests
+
+**Run all tests:**
+
+```bash
+cd frontend
+npm test
+```
+
+**Run tests with code coverage:**
+
+```bash
+npm test -- --code-coverage
+```
+
+**View coverage report:**
+
+Open `frontend/coverage/index.html` in a browser.
+
+**Test configuration in `angular.json`:**
+
+```json
+{
+  "test": {
+    "builder": "@angular-devkit/build-angular:karma",
+    "options": {
+      "main": "src/test.ts",
+      "polyfills": ["zone.js", "zone.js/testing"],
+      "tsConfig": "tsconfig.spec.json",
+      "karmaConfig": "karma.conf.js",
+      "codeCoverage": true,
+      "codeCoverageExclude": [
+        "src/**/*.spec.ts",
+        "src/test.ts"
+      ]
+    }
+  }
+}
+```
+
+**Update `karma.conf.js` for CI:**
+
+```javascript
+module.exports = function(config) {
+  config.set({
+    basePath: '',
+    frameworks: ['jasmine', '@angular-devkit/build-angular'],
+    plugins: [
+      require('karma-jasmine'),
+      require('karma-chrome-launcher'),
+      require('karma-jasmine-html-reporter'),
+      require('karma-coverage'),
+      require('@angular-devkit/build-angular/plugins/karma')
+    ],
+    client: {
+      clearContext: false,
+      jasmine: {
+        random: false
+      }
+    },
+    coverageReporter: {
+      dir: require('path').join(__dirname, './coverage'),
+      subdir: '.',
+      reporters: [
+        { type: 'html' },
+        { type: 'text-summary' },
+        { type: 'lcovonly' }
+      ],
+      check: {
+        global: {
+          statements: 80,
+          branches: 70,
+          functions: 80,
+          lines: 80
+        }
+      }
+    },
+    reporters: ['progress', 'kjhtml', 'coverage'],
+    port: 9876,
+    colors: true,
+    logLevel: config.LOG_INFO,
+    autoWatch: true,
+    browsers: ['Chrome'],
+    customLaunchers: {
+      ChromeHeadlessCI: {
+        base: 'ChromeHeadless',
+        flags: ['--no-sandbox', '--disable-gpu']
+      }
+    },
+    singleRun: false,
+    restartOnFileChange: true
+  });
+};
+```
+
+### Step 6.7: Enable Tests in Maven Build
+
+Edit `frontend/pom.xml` to uncomment the test execution:
+
+```xml
+<execution>
+    <id>npm run test</id>
+    <goals>
+        <goal>npm</goal>
+    </goals>
+    <phase>test</phase>
+    <configuration>
+        <arguments>run test -- --watch=false --browsers=ChromeHeadlessCI --code-coverage</arguments>
+        <!-- Remove skip tag to enable tests -->
+    </configuration>
+</execution>
+```
+
+---
+
+## Phase 6: Integration & CI/CD
+
+### Step 6.1: Frontend Development Workflow
 
 The `docker-compose-frontend.yml` file (created in Phase 1, Step 1.0) provides a complete development environment.
 
@@ -1752,7 +2554,7 @@ npm start
 # docker-compose -f docker-compose-frontend.yml up -d
 ```
 
-### Step 5.2: Update Jenkinsfile
+### Step 6.2: Update Jenkinsfile
 
 Add Node.js installation and frontend build:
 
@@ -1786,7 +2588,7 @@ stage('Build') {
 }
 ```
 
-### Step 5.3: Create Development Scripts
+### Step 6.3: Create Development Scripts
 
 Create `scripts/start-frontend-dev.sh`:
 

@@ -1,0 +1,85 @@
+<div class="author-edit-container">
+  <h1>Edit Author</h1>
+
+  @if (isLoading) {
+  <div class="loading">Loading author...</div>
+  } @if (error) {
+  <div class="error">{{ error }}</div>
+  } @if (!isLoading) {
+  <form [formGroup]="authorForm" (ngSubmit)="onSubmit()">
+    <div class="form-field">
+      <label for="name">Name *</label>
+      <input id="name" type="text" formControlName="name" placeholder="Enter author name" />
+      @if (name?.invalid && name?.touched) {
+      <div class="error-message">
+        @if (name?.errors?.['required']) {
+        <span>Name is required</span>
+        } @if (name?.errors?.['minlength']) {
+        <span>Name must be at least 2 characters</span>
+        } @if (name?.errors?.['maxlength']) {
+        <span>Name must not exceed 100 characters</span>
+        }
+      </div>
+      }
+    </div>
+
+    <div class="form-field">
+      <label for="biography">Biography</label>
+      <textarea
+        id="biography"
+        formControlName="biography"
+        placeholder="Enter author biography"
+        rows="5"
+      ></textarea>
+      @if (biography?.invalid && biography?.touched) {
+      <div class="error-message">
+        @if (biography?.errors?.['maxlength']) {
+        <span>Biography must not exceed 1000 characters</span>
+        }
+      </div>
+      }
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label for="birthYear">Birth Year</label>
+        <input id="birthYear" type="number" formControlName="birthYear" placeholder="e.g., -469" />
+        @if (birthYear?.invalid && birthYear?.touched) {
+        <div class="error-message">
+          @if (birthYear?.errors?.['min']) {
+          <span>Birth year must be at least -500</span>
+          } @if (birthYear?.errors?.['max']) {
+          <span>Birth year must not exceed 2100</span>
+          }
+        </div>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="deathYear">Death Year</label>
+        <input id="deathYear" type="number" formControlName="deathYear" placeholder="e.g., -399" />
+        @if (deathYear?.invalid && deathYear?.touched) {
+        <div class="error-message">
+          @if (deathYear?.errors?.['min']) {
+          <span>Death year must be at least -500</span>
+          } @if (deathYear?.errors?.['max']) {
+          <span>Death year must not exceed 2100</span>
+          }
+        </div>
+        }
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="onCancel()">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="authorForm.invalid || isSubmitting">
+        @if (isSubmitting) {
+        <span>Saving...</span>
+        } @else {
+        <span>Save Changes</span>
+        }
+      </button>
+    </div>
+  </form>
+  }
+</div>
