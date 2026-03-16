@@ -1,6 +1,7 @@
 # Angular 20 Frontend Module - Detailed Implementation Plan
 
 ## Table of Contents
+
 1. [Overview](#overview)
 2. [Prerequisites](#prerequisites)
 3. [Phase 1: Multi-Module Maven Setup](#phase-1-multi-module-maven-setup)
@@ -16,9 +17,11 @@
 ## Overview
 
 ### Goal
+
 Add an Angular 20 frontend as a separate Maven module to provide a full-featured web UI for the Quote REST API, with complete CRUD operations for Authors and Quotes, integrated with Keycloak OAuth2 authentication.
 
 ### Architecture Decision
+
 - **Multi-module Maven project**: Parent POM with two modules (backend, frontend)
 - **Development setup**: Separate servers (Angular: 4200, Backend: 8080)
 - **Build integration**: frontend-maven-plugin for Node/npm in Maven lifecycle
@@ -26,6 +29,7 @@ Add an Angular 20 frontend as a separate Maven module to provide a full-featured
 - **UI Framework**: Angular 20 + Angular Material
 
 ### Final Project Structure
+
 ```
 quote-rest-api/
 ├── pom.xml                              # Parent POM
@@ -108,6 +112,7 @@ quote-rest-api/
 ## Prerequisites
 
 ### Required Software
+
 - **Node.js 20.x or 22.x (LTS)** - JavaScript runtime (NOT 25.x - unsupported by Angular 20)
 - **npm 10.x+** - Package manager
 - **Angular CLI 20.x** - Command-line interface
@@ -116,6 +121,7 @@ quote-rest-api/
 - **Docker** - For PostgreSQL and Keycloak
 
 ### Installation Commands
+
 ```bash
 # Install Node.js 20.x LTS (Recommended - Windows)
 # Download from: https://nodejs.org/en/download/
@@ -143,6 +149,7 @@ ng version            # Should be 20.x.x
 **Important:** Angular 20 requires Node.js 20.x (Iron LTS) or 22.x. Node.js 25.x is NOT supported and will cause build failures.
 
 ### Keycloak Configuration (Automated)
+
 The Keycloak frontend client will be automatically configured via a new realm JSON file that includes both the backend and frontend client configurations. No manual Keycloak admin console steps required!
 
 ---
@@ -428,6 +435,7 @@ volumes:
 - **Dedicated network** (`quote-frontend-network`) for service isolation
 
 **Usage:**
+
 ```bash
 # Start full frontend development stack
 docker-compose -f docker-compose-frontend.yml up -d
@@ -458,12 +466,10 @@ docker-compose -f docker-compose-frontend.yml down -v
 1. **PostgreSQL Version**: Keycloak requires PostgreSQL 13+
    - Changed `postgres:12` → `postgres:13`
    - Error: "database version of at least '13.0.0', but the actual version is '12.22.0'"
-
 2. **Keycloak Healthcheck**: Original healthcheck command failed
    - Changed from complex HTTP check to simple TCP check
    - Original used `wget` which isn't installed in Keycloak container
    - New: `["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 || exit 1"]`
-
 3. **Backend Build Context**: Multi-module structure requires root context
    - Changed from `context: ./backend, dockerfile: ../Dockerfile`
    - To: `context: ., dockerfile: backend/Dockerfile`
@@ -472,6 +478,7 @@ docker-compose -f docker-compose-frontend.yml down -v
 ### Step 1.1: Backup Current Project
 
 ✅ **COMPLETED**
+
 ```bash
 # Create a backup
 cd C:\Users\Katya de Vries\IdeaProjects
@@ -479,6 +486,7 @@ cp -r quote-rest-api quote-rest-api-backup
 ```
 
 ### Step 1.2: Create Parent POM
+
 Create `pom.xml` in project root:
 
 ```xml
@@ -766,6 +774,7 @@ All steps completed successfully! The project is now restructured as a multi-mod
 - Docker Compose setup for full development environment
 
 ### Key Files Created/Modified:
+
 1. **`pom.xml`** (root) - Parent POM
 2. **`backend/pom.xml`** - Backend module POM with parent reference
 3. **`backend/Dockerfile`** - Multi-module Docker build
@@ -782,6 +791,7 @@ All steps completed successfully! The project is now restructured as a multi-mod
 6. **Module Order**: Comment out frontend module in parent POM until Phase 2 creates it
 
 ### Current Project Structure:
+
 ```
 quote-rest-api/
 ├── pom.xml                              # Parent POM (modules: backend)
@@ -811,6 +821,7 @@ The foundation is now in place to create the Angular frontend module. Next steps
 ## Phase 2: Angular Module Initialization
 
 ### Step 2.1: Create Frontend Directory
+
 ```bash
 cd C:\Users\Katya de Vries\IdeaProjects\quote-rest-api
 mkdir frontend
@@ -818,6 +829,7 @@ cd frontend
 ```
 
 ### Step 2.2: Initialize Angular Project
+
 ```bash
 # Create new Angular 20 project (standalone components)
 ng new . --directory ./ --routing --style scss --standalone --skip-git
@@ -829,6 +841,7 @@ ng new . --directory ./ --routing --style scss --standalone --skip-git
 ```
 
 ### Step 2.3: Install Required Dependencies
+
 ```bash
 cd frontend
 
@@ -846,6 +859,7 @@ npm install rxjs @angular/common/http --save
 ```
 
 ### Step 2.4: Create Frontend Maven POM
+
 Create `frontend/pom.xml`:
 
 ```xml
@@ -939,6 +953,7 @@ Create `frontend/pom.xml`:
 ```
 
 ### Step 2.5: Configure Angular Build Output
+
 Edit `frontend/angular.json` to set output path:
 
 ```json
@@ -960,6 +975,7 @@ Edit `frontend/angular.json` to set output path:
 ```
 
 ### Step 2.6: Create Development Proxy Configuration
+
 Create `frontend/proxy.conf.json`:
 
 ```json
@@ -996,6 +1012,7 @@ Update `frontend/angular.json` to use proxy:
 ## Phase 3: Core Infrastructure
 
 ### Step 3.1: Create Environment Configuration
+
 Edit `frontend/src/environments/environment.ts`:
 
 ```typescript
@@ -1025,6 +1042,7 @@ export const environment = {
 ```
 
 ### Step 3.2: Create Core Models
+
 Create `frontend/src/app/core/models/author.model.ts`:
 
 ```typescript
@@ -1070,6 +1088,7 @@ export interface QuotePage {
 ```
 
 ### Step 3.3: Initialize Keycloak
+
 Edit `frontend/src/app/app.config.ts`:
 
 ```typescript
@@ -1123,6 +1142,7 @@ export const appConfig: ApplicationConfig = {
 ```
 
 ### Step 3.4: Create Authentication Service
+
 Create `frontend/src/app/core/services/auth.service.ts`:
 
 ```typescript
@@ -1172,6 +1192,7 @@ export class AuthService {
 ```
 
 ### Step 3.5: Create Auth Guard
+
 Create `frontend/src/app/core/guards/auth.guard.ts`:
 
 ```typescript
@@ -1209,6 +1230,7 @@ export const authGuard: CanActivateFn = async (route, state) => {
 ```
 
 ### Step 3.6: Create HTTP Interceptors
+
 Create `frontend/src/app/core/interceptors/auth.interceptor.ts`:
 
 ```typescript
@@ -1279,6 +1301,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 ```
 
 ### Step 3.7: Create API Base Service
+
 Create `frontend/src/app/core/services/api.service.ts`:
 
 ```typescript
@@ -1326,6 +1349,7 @@ export class ApiService {
 ## Phase 4: Feature Implementation
 
 ### Step 4.1: Create Authors Service
+
 Create `frontend/src/app/features/authors/services/author.service.ts`:
 
 ```typescript
@@ -1373,6 +1397,7 @@ export class AuthorService {
 ```
 
 ### Step 4.2: Create Author List Component
+
 ```bash
 cd frontend/src/app/features/authors
 ng generate component components/author-list --standalone
@@ -1580,12 +1605,15 @@ Edit `author-list.component.html`:
 ```
 
 ### Step 4.3: Create Author Form Components
+
 *Similar pattern for author-create, author-edit, author-delete-dialog components*
 
 ### Step 4.4: Create Quotes Service and Components
+
 *Follow same pattern as Authors - service, list, create, edit, delete-dialog components*
 
 ### Step 4.5: Create Routing
+
 Edit `frontend/src/app/app.routes.ts`:
 
 ```typescript
@@ -1680,6 +1708,7 @@ npm start
 ```
 
 ### Step 5.2: Update Jenkinsfile
+
 Add Node.js installation and frontend build:
 
 ```groovy
@@ -1889,13 +1918,13 @@ Write-Host "   To stop all services: docker-compose -f docker-compose-frontend.y
 ## Testing Strategy
 
 ### Manual Testing Checklist
+
 1. **Authentication**
    - [ ] User can access login page
    - [ ] User can log in with Keycloak credentials
    - [ ] JWT token is stored and sent with requests
    - [ ] Token refresh works automatically
    - [ ] User can log out successfully
-
 2. **Authors CRUD**
    - [ ] List authors with pagination
    - [ ] Search authors by name
@@ -1903,14 +1932,12 @@ Write-Host "   To stop all services: docker-compose -f docker-compose-frontend.y
    - [ ] Edit existing author
    - [ ] Delete author (with confirmation)
    - [ ] Error handling displays messages
-
 3. **Quotes CRUD**
    - [ ] List quotes with author names
    - [ ] Create quote with author selection
    - [ ] Edit existing quote
    - [ ] Delete quote (with confirmation)
    - [ ] Pagination and filtering work
-
 4. **Integration**
    - [ ] CORS allows frontend requests
    - [ ] Proxy configuration works in development
@@ -1918,6 +1945,7 @@ Write-Host "   To stop all services: docker-compose -f docker-compose-frontend.y
    - [ ] Jenkins pipeline builds both modules
 
 ### Automated Testing (Future)
+
 - Unit tests for services (Jasmine/Karma)
 - E2E tests (Playwright - already available)
 - Component tests (Angular Testing Library)
@@ -1927,6 +1955,7 @@ Write-Host "   To stop all services: docker-compose -f docker-compose-frontend.y
 ## Deployment Strategy
 
 ### Development
+
 **Recommended: Use the automated development script**
 
 ```bash
@@ -1958,6 +1987,7 @@ npm start
 - Test with: frontend-user / password
 
 ### Production (Future Enhancement)
+
 Option 1: Serve Angular from Spring Boot static resources
 Option 2: Separate deployments with reverse proxy (nginx)
 Option 3: CDN for frontend static files
@@ -2003,6 +2033,7 @@ The plan includes automated Keycloak configuration that eliminates manual setup 
 5. Ready for Angular app to connect immediately
 
 **Verification:**
+
 ```bash
 # After starting docker-compose-frontend.yml
 # Open Keycloak Admin Console: http://localhost:9090
@@ -2040,18 +2071,20 @@ The plan includes automated Keycloak configuration that eliminates manual setup 
 
 **3. Maven Build Fails**
 - **CRITICAL**: Check Node.js version must be 20.x or 22.x (NOT 25.x)
-  - Run `node --version` - if v25.x, downgrade to v20.x LTS
-  - Uninstall Node 25.x and install Node 20.x LTS from nodejs.org
-  - Or use nvm: `nvm install 20 && nvm use 20`
+- Run `node --version` - if v25.x, downgrade to v20.x LTS
+- Uninstall Node 25.x and install Node 20.x LTS from nodejs.org
+- Or use nvm: `nvm install 20 && nvm use 20`
 - Clear npm cache: `npm cache clean --force`
 - Delete node_modules and reinstall: `rm -rf node_modules && npm install`
 - Verify frontend-maven-plugin version is 1.15.1+
 
 **4. Node.js Version Unsupported Error**
+
 ```
 Angular CLI: 20.3.15
 Node: 25.2.1 (Unsupported)
 ```
+
 **Solution**: Angular 20 does NOT support Node.js 25.x
 - Uninstall Node.js 25.x
 - Install Node.js 20.x LTS from https://nodejs.org/en/download/
@@ -2086,3 +2119,4 @@ Node: 25.2.1 (Unsupported)
 - Angular Material: https://material.angular.io
 - Keycloak Angular: https://github.com/mauriciovigolo/keycloak-angular
 - Frontend Maven Plugin: https://github.com/eirslett/frontend-maven-plugin
+

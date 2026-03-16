@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0          https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.katya</groupId>
+    <artifactId>quote-application</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>quote-frontend</artifactId>
+  <packaging>jar</packaging>
+
+  <name>Quote Application Frontend</name>
+  <description>Angular 20 frontend for Quote REST API</description>
+
+  <properties>
+    <node.version>v20.18.3</node.version>
+    <npm.version>10.9.2</npm.version>
+    <frontend-maven-plugin.version>1.15.1</frontend-maven-plugin.version>
+    <spotless.version>2.43.0</spotless.version>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+        <version>${frontend-maven-plugin.version}</version>
+        <configuration>
+          <nodeVersion>${node.version}</nodeVersion>
+          <npmVersion>${npm.version}</npmVersion>
+          <workingDirectory>${project.basedir}</workingDirectory>
+        </configuration>
+        <executions>
+          <!-- Install Node and npm -->
+          <execution>
+            <id>install node and npm</id>
+            <goals>
+              <goal>install-node-and-npm</goal>
+            </goals>
+            <phase>generate-resources</phase>
+          </execution>
+
+          <!-- Install npm dependencies -->
+          <execution>
+            <id>npm install</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <arguments>install</arguments>
+            </configuration>
+          </execution>
+
+          <!-- Build Angular app -->
+          <execution>
+            <id>npm run build</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <phase>prepare-package</phase>
+            <configuration>
+              <arguments>run build -- --configuration production</arguments>
+            </configuration>
+          </execution>
+
+          <!-- Optional: Run tests -->
+          <execution>
+            <id>npm run test</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <phase>test</phase>
+            <configuration>
+              <arguments>run test -- --watch=false --browsers=ChromeHeadless</arguments>
+              <skip>true</skip>
+              <!-- Enable when tests are ready -->
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Spotless Maven Plugin for code formatting -->
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>${spotless.version}</version>
+        <configuration>
+          <!-- Format TypeScript files -->
+          <typescript>
+            <includes>
+              <include>src/**/*.ts</include>
+            </includes>
+            <prettier>
+              <devDependencies>
+                <prettier>3.0.0</prettier>
+              </devDependencies>
+              <config>
+                <printWidth>100</printWidth>
+                <singleQuote>true</singleQuote>
+                <trailingComma>es5</trailingComma>
+                <semi>true</semi>
+                <tabWidth>2</tabWidth>
+              </config>
+            </prettier>
+          </typescript>
+
+          <!-- Format HTML files -->
+          <formats>
+            <format>
+              <includes>
+                <include>src/**/*.html</include>
+              </includes>
+              <prettier>
+                <devDependencies>
+                  <prettier>3.0.0</prettier>
+                </devDependencies>
+                <config>
+                  <parser>angular</parser>
+                  <printWidth>100</printWidth>
+                  <singleQuote>true</singleQuote>
+                </config>
+              </prettier>
+            </format>
+
+            <!-- Format SCSS files -->
+            <format>
+              <includes>
+                <include>src/**/*.scss</include>
+              </includes>
+              <prettier>
+                <devDependencies>
+                  <prettier>3.0.0</prettier>
+                </devDependencies>
+                <config>
+                  <parser>scss</parser>
+                  <printWidth>100</printWidth>
+                  <singleQuote>true</singleQuote>
+                </config>
+              </prettier>
+            </format>
+
+            <!-- Format JSON files -->
+            <format>
+              <includes>
+                <include>src/**/*.json</include>
+                <include>angular.json</include>
+                <include>package.json</include>
+                <include>tsconfig*.json</include>
+              </includes>
+              <prettier>
+                <devDependencies>
+                  <prettier>3.0.0</prettier>
+                </devDependencies>
+                <config>
+                  <parser>json</parser>
+                  <printWidth>100</printWidth>
+                  <tabWidth>2</tabWidth>
+                </config>
+              </prettier>
+            </format>
+          </formats>
+
+          <!-- Format POM file -->
+          <pom>
+            <includes>
+              <include>pom.xml</include>
+            </includes>
+            <sortPom>
+              <expandEmptyElements>false</expandEmptyElements>
+            </sortPom>
+          </pom>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <phase>verify</phase>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

@@ -118,30 +118,36 @@ Navigate to **Dashboard** → **Manage Jenkins** → **Plugins** → **Available
 Search for and install the following plugins:
 
 #### Git & GitHub (usually pre-installed)
+
 - ✅ **Git Plugin** - Git SCM support
 - ✅ **GitHub Plugin** - GitHub integration (includes webhook support)
 - ✅ **GitHub Branch Source Plugin** - Multi-branch pipeline support
 
 #### Maven & Build Tools
+
 - ✅ **Maven Integration Plugin** - Maven project support
 - ✅ **Pipeline Maven Integration Plugin** - Maven support in pipelines
 - ✅ **Config File Provider** - Manage Maven settings
 
 #### Docker
+
 - ✅ **Docker Plugin** - Docker integration
 - ✅ **Docker Pipeline** - Docker commands in pipeline
 - ✅ **Docker Commons Plugin** - Docker common functionality
 
 #### Testing & Reporting
+
 - ✅ **JUnit Plugin** - Publish JUnit test results (usually pre-installed)
 - ✅ **Code Coverage API Plugin** - Code coverage visualization (replaces deprecated JaCoCo plugin)
 - ✅ **HTML Publisher Plugin** - Publish HTML reports
 - ✅ **Test Results Analyzer Plugin** - Detailed test analysis
 
 #### Build Parameters
+
 - ✅ **Git Parameter Plugin** - Allow users to select Git branches/tags as build parameters
 
 #### Optional but Recommended
+
 - ✅ **Blue Ocean** - Modern Jenkins UI
 - ✅ **Timestamper Plugin** - Timestamps in console output
 - ✅ **Build Timeout Plugin** - Abort builds after timeout
@@ -243,6 +249,7 @@ The project includes PowerShell and Bash scripts for managing Jenkins:
 ```
 
 Expected output:
+
 ```
 Jenkins Container Status:
 NAMES           STATUS              PORTS
@@ -276,6 +283,7 @@ Access at: http://localhost:8090
 **Problem**: `docker-compose up jenkins` fails or container exits immediately
 
 **Solutions**:
+
 ```powershell
 # Check Docker is running
 docker ps
@@ -307,6 +315,7 @@ docker volume rm quote-jenkins-data
 **Problem**: Password retrieval fails
 
 **Solutions**:
+
 ```powershell
 # Wait for Jenkins to initialize (30-60 seconds)
 Start-Sleep -Seconds 60
@@ -325,10 +334,12 @@ docker exec quote-jenkins cat /var/jenkins_home/secrets/initialAdminPassword
 **Solutions**:
 1. Ensure Docker Desktop is running with admin privileges
 2. Verify Docker socket is mounted in docker-compose.yml:
-   ```yaml
-   volumes:
-     - /var/run/docker.sock:/var/run/docker.sock
-   ```
+
+```yaml
+volumes:
+  - /var/run/docker.sock:/var/run/docker.sock
+```
+
 3. On Linux, add Jenkins user to docker group (not needed on Windows)
 
 ### Plugin Installation Fails
@@ -349,12 +360,15 @@ docker exec quote-jenkins cat /var/jenkins_home/secrets/initialAdminPassword
 
 **Solutions**:
 1. Edit `docker-compose.yml` to increase memory:
-   ```yaml
-   jenkins:
-     environment:
-       JAVA_OPTS: "-Xmx2048m -Djenkins.install.runSetupWizard=false"
-   ```
+
+```yaml
+jenkins:
+  environment:
+    JAVA_OPTS: "-Xmx2048m -Djenkins.install.runSetupWizard=false"
+```
+
 2. Restart Jenkins:
+
    ```powershell
    .\scripts\jenkins\jenkins-docker.ps1 restart
    ```
@@ -366,7 +380,7 @@ docker exec quote-jenkins cat /var/jenkins_home/secrets/initialAdminPassword
 Jenkins data is stored in a Docker volume:
 
 - **Volume name**: `quote-jenkins-data`
-- **Contains**: 
+- **Contains**:
   - Jenkins configuration
   - Job configurations
   - Build history
@@ -408,15 +422,15 @@ Continue to the next section: **[Creating the Jenkinsfile](./JENKINS_PIPELINE_GU
 
 ## Quick Reference
 
-| Command | Description |
-|---------|-------------|
-| `.\scripts\jenkins\jenkins-docker.ps1 start` | Start Jenkins |
-| `.\scripts\jenkins\jenkins-docker.ps1 stop` | Stop Jenkins |
-| `.\scripts\jenkins\jenkins-docker.ps1 status` | Check status |
-| `.\scripts\jenkins\jenkins-docker.ps1 password` | Get admin password |
-| `.\scripts\jenkins\jenkins-docker.ps1 logs` | View logs |
-| `docker exec -it quote-jenkins bash` | Access container shell |
-| `docker logs -f quote-jenkins` | Follow logs |
+|                     Command                     |      Description       |
+|-------------------------------------------------|------------------------|
+| `.\scripts\jenkins\jenkins-docker.ps1 start`    | Start Jenkins          |
+| `.\scripts\jenkins\jenkins-docker.ps1 stop`     | Stop Jenkins           |
+| `.\scripts\jenkins\jenkins-docker.ps1 status`   | Check status           |
+| `.\scripts\jenkins\jenkins-docker.ps1 password` | Get admin password     |
+| `.\scripts\jenkins\jenkins-docker.ps1 logs`     | View logs              |
+| `docker exec -it quote-jenkins bash`            | Access container shell |
+| `docker logs -f quote-jenkins`                  | Follow logs            |
 
 ---
 
@@ -426,3 +440,4 @@ Continue to the next section: **[Creating the Jenkinsfile](./JENKINS_PIPELINE_GU
 - View Jenkins logs: `.\scripts\jenkins\jenkins-docker.ps1 logs`
 - Restart Jenkins: `.\scripts\jenkins\jenkins-docker.ps1 restart`
 - Check Docker status: `docker ps`
+

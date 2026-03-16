@@ -41,10 +41,10 @@ Choose one or both:
 **Option B: GitHub hook trigger** (Trigger on push - requires GitHub plugin)
 - ✅ Check **GitHub hook trigger for GITScm polling**
 - Then configure webhook in GitHub repository settings:
-  - Go to repository → Settings → Webhooks → Add webhook
-  - Payload URL: `http://your-jenkins-url:8090/github-webhook/`
-  - Content type: `application/json`
-  - Select: "Just the push event"
+- Go to repository → Settings → Webhooks → Add webhook
+- Payload URL: `http://your-jenkins-url:8090/github-webhook/`
+- Content type: `application/json`
+- Select: "Just the push event"
 
 #### Pipeline Configuration
 
@@ -129,8 +129,8 @@ Scroll to **Pipeline** section:
 - **SCM**: `Git`
 - **Repository URL**: Your Git repository URL
 - **Branch Specifier**: `*/jenkins-setup` (or whatever branch contains your Jenkinsfile)
-  - ⚠️ This must be a FIXED branch where Jenkins reads the Jenkinsfile
-  - Do NOT use `${BRANCH_NAME}` here - that's for testing branches, not for finding the Jenkinsfile
+- ⚠️ This must be a FIXED branch where Jenkins reads the Jenkinsfile
+- Do NOT use `${BRANCH_NAME}` here - that's for testing branches, not for finding the Jenkinsfile
 - **Script Path**: `Jenkinsfile`
 
 **Step 5: Jenkinsfile Parameters Block**
@@ -199,7 +199,6 @@ pipeline {
    - Fixed branch where Jenkins READS the Jenkinsfile
    - Doesn't change when you select different branches to test
    - Example: Always use `jenkins-setup` branch for the pipeline definition
-
 2. **BRANCH_NAME Parameter** (dropdown selection):
    - Branch you want to TEST
    - User selects from dropdown
@@ -207,6 +206,7 @@ pipeline {
    - Example: You can test `master`, `mcp-tests`, or any other branch
 
 **Workflow:**
+
 ```
 1. User clicks "Build with Parameters"
 2. User selects "mcp-tests" from BRANCH_NAME dropdown
@@ -222,6 +222,7 @@ This allows you to keep your pipeline definition in one branch (e.g., `jenkins-s
 Beyond the branch selection, you can add more parameters in the Jenkinsfile:
 
 **Boolean Parameter**:
+
 ```groovy
 parameters {
     string(name: 'BRANCH_NAME', defaultValue: 'master', description: 'Branch to test')
@@ -234,6 +235,7 @@ parameters {
 ```
 
 **Choice Parameter**:
+
 ```groovy
 choice(
     name: 'ENVIRONMENT',
@@ -291,8 +293,8 @@ pipeline {
 **Subsequent Builds**:
 1. Click **Build with Parameters**
 2. A form appears with your parameters:
-   - **BRANCH_NAME**: Dropdown with all available branches
-   - Select the branch you want to test (e.g., `jenkins-setup`, `master`, `mcp-tests`)
+- **BRANCH_NAME**: Dropdown with all available branches
+- Select the branch you want to test (e.g., `jenkins-setup`, `master`, `mcp-tests`)
 3. Modify any other parameters as needed
 4. Click **Build** to start
 
@@ -338,14 +340,14 @@ The exact stages and their order are defined in the `Jenkinsfile` in this reposi
 
 Below is a typical high-level breakdown of what the pipeline does:
 
-| Stage (typical)        | Purpose                                  |
-|------------------------|------------------------------------------|
-| 📦 Checkout            | Clone repository and fetch source code   |
-| 🔨 Build & Unit Tests  | Compile with Maven and run unit tests    |
-| ✨ Code Quality        | Apply formatting / static checks         |
-| 🔧 Integration Tests   | Run integration tests (e.g. Testcontainers) |
-| 📊 Code Coverage       | Generate JaCoCo or similar coverage report |
-| 📦 Package / Docker    | Package application and/or build images  |
+|    Stage (typical)    |                   Purpose                   |
+|-----------------------|---------------------------------------------|
+| 📦 Checkout           | Clone repository and fetch source code      |
+| 🔨 Build & Unit Tests | Compile with Maven and run unit tests       |
+| ✨ Code Quality        | Apply formatting / static checks            |
+| 🔧 Integration Tests  | Run integration tests (e.g. Testcontainers) |
+| 📊 Code Coverage      | Generate JaCoCo or similar coverage report  |
+| 📦 Package / Docker   | Package application and/or build images     |
 
 > ℹ️ Refer to the `Jenkinsfile` for the **current, exact** stage names and any additional stages (such as service startup, end-to-end tests, or deployment).
 
@@ -473,22 +475,20 @@ post {
    - Should be a fixed branch like `*/jenkins-setup` or `*/master`
    - Should NOT be `${BRANCH_NAME}` or `*/${BRANCH_NAME}`
    - Click **Save**
-
 2. **Jenkinsfile doesn't exist in the specified branch**
    - Verify which branch contains the Jenkinsfile:
+
      ```bash
      git ls-tree -r --name-only origin/master | grep Jenkinsfile
      git ls-tree -r --name-only origin/jenkins-setup | grep Jenkinsfile
      ```
    - Update Branch Specifier to the correct branch
    - Or merge Jenkinsfile to your specified branch
-
 3. **Wrong Script Path**
    - Script Path is case-sensitive
    - Default should be: `Jenkinsfile` (capital J)
    - Check if your file is named differently: `jenkinsfile`, `Jenkinsfile.groovy`, etc.
    - Update **Script Path** to match exact filename
-
 4. **Git Parameter loses configuration after build**
    - Ensure Jenkinsfile has a `parameters` block (even if Git Parameter plugin overrides it)
    - This tells Jenkins to expect parameters and prevents them from being removed
@@ -504,9 +504,9 @@ post {
 1. Go to job → **Configure** → **Pipeline** section
 2. Find **Branch Specifier** (under "Branches to build")
 3. Change it to a **FIXED branch name** where your Jenkinsfile lives:
-   - If Jenkinsfile is in `jenkins-setup`: Use `*/jenkins-setup`
-   - If Jenkinsfile is in `master`: Use `*/master`
-   - **Do NOT use `${BRANCH_NAME}` or `*/${BRANCH_NAME}` here**
+- If Jenkinsfile is in `jenkins-setup`: Use `*/jenkins-setup`
+- If Jenkinsfile is in `master`: Use `*/master`
+- **Do NOT use `${BRANCH_NAME}` or `*/${BRANCH_NAME}` here**
 4. Click **Save**
 
 **Why This Happens:**
@@ -516,6 +516,7 @@ post {
 - Jenkins needs a fixed location to find and read the Jenkinsfile before it can run and use parameters
 
 **Correct Configuration:**
+
 ```
 Pipeline Section:
 - Branch Specifier: */jenkins-setup  ← Fixed branch containing Jenkinsfile
@@ -557,6 +558,7 @@ General Section (Git Parameter):
 **Problem**: Docker containers won't start
 
 **Solution**:
+
 ```bash
 # Check if services are already running
 docker ps | grep quote
@@ -599,6 +601,7 @@ If you're using an older Jenkinsfile:
 3. No separate docker-compose installation needed
 
 **Changes made in Jenkinsfile**:
+
 ```groovy
 // Old (v1)
 sh 'docker-compose up -d'
@@ -624,24 +627,29 @@ sh 'docker compose down'
 ## Best Practices
 
 ### 1. Keep Builds Fast
+
 - Run unit tests before slow integration tests
 - Use Docker layer caching
 - Parallelize independent stages (if needed)
 
 ### 2. Fail Fast
+
 - Run code quality checks early
 - Stop build on first major failure
 
 ### 3. Clean Workspace
+
 - Use `cleanWs()` in post section
 - Remove build artifacts after archiving
 
 ### 4. Monitor Trends
+
 - Check test result trends
 - Monitor code coverage changes
 - Review build duration trends
 
 ### 5. Secure Credentials
+
 - Never hardcode passwords in Jenkinsfile
 - Use Jenkins credentials store
 - Use environment variables for secrets
@@ -690,7 +698,7 @@ docker-compose down
 ⏭️ Set up build notifications  
 ⏭️ Configure deployment stages  
 ⏭️ Add security scanning (OWASP, SonarQube)  
-⏭️ Implement blue-green deployment  
+⏭️ Implement blue-green deployment
 
 ---
 
@@ -709,3 +717,4 @@ docker-compose down
 - View **JaCoCo** (left sidebar) for code coverage reports
 - Check **Pipeline Steps** for stage-by-stage execution details
 - Check Jenkins container logs: `.\scripts\jenkins\jenkins-docker.ps1 logs`
+
