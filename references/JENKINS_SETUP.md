@@ -407,7 +407,7 @@ docker run --rm -v quote-jenkins-data:/data -v ${PWD}:/backup alpine tar xzf /ba
 ⏭️ Integrate with Git repository  
 ⏭️ Set up automated builds
 
-Continue to the next section: **[Creating the Jenkinsfile](./JENKINS_PIPELINE_GUIDE.md)**
+Continue to the next section: **[Creating the Jenkinsfile](JENKINS_PIPELINE_GUIDE.md)**
 
 ---
 

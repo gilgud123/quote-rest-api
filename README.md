@@ -87,7 +87,7 @@ JaCoCo report:
 
 ## Code Formatting
 
-This project uses **Spotless** to enforce consistent code formatting. See [SPOTLESS.md](SPOTLESS.md) for details.
+This project uses **Spotless** to enforce consistent code formatting. See [SPOTLESS.md](references/SPOTLESS.md) for details.
 
 ```powershell
 # Apply formatting to all files
@@ -144,8 +144,8 @@ This project includes a complete Jenkins CI/CD pipeline for automated builds, te
 
 ### Documentation
 
-- **[JENKINS_SETUP.md](./JENKINS_SETUP.md)** - Installation and configuration
-- **[JENKINS_PIPELINE_GUIDE.md](./JENKINS_PIPELINE_GUIDE.md)** - Pipeline usage and troubleshooting
+- **[JENKINS_SETUP.md](references/JENKINS_SETUP.md)** - Installation and configuration
+- **[JENKINS_PIPELINE_GUIDE.md](references/JENKINS_PIPELINE_GUIDE.md)** - Pipeline usage and troubleshooting
 
 ### Pipeline Stages
 

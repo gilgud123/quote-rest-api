@@ -4,7 +4,7 @@ This guide helps you create and run the Jenkins pipeline for the Quote REST API 
 
 ## Prerequisites
 
-✅ Jenkins installed and running (see [JENKINS_SETUP.md](./JENKINS_SETUP.md))  
+✅ Jenkins installed and running (see [JENKINS_SETUP.md](JENKINS_SETUP.md))  
 ✅ Required plugins installed  
 ✅ Docker accessible from Jenkins
 
