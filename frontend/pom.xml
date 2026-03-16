@@ -23,6 +23,18 @@
 
   <build>
     <plugins>
+      <!-- Maven Clean Plugin - upgraded for better Windows support -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.3.2</version>
+        <configuration>
+          <retryOnError>true</retryOnError>
+          <failOnError>false</failOnError>
+          <excludeDefaultDirectories>false</excludeDefaultDirectories>
+        </configuration>
+      </plugin>
+
       <plugin>
         <groupId>com.github.eirslett</groupId>
         <artifactId>frontend-maven-plugin</artifactId>
