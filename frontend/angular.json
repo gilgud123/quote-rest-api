@@ -97,7 +97,9 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.scss"]
+            "styles": ["src/styles.scss"],
+            "codeCoverage": true,
+            "codeCoverageExclude": ["src/**/*.spec.ts", "src/test.ts", "src/main.ts"]
           }
         }
       }

@@ -1,5 +1,8 @@
 # Docker Compose configuration for Quote REST API
 # Runs PostgreSQL and Spring Boot application together
+#
+# For frontend development with Angular, use docker-compose-frontend.yml instead:
+#   docker-compose -f docker-compose-frontend.yml up -d
 
 version: "3.8"
 

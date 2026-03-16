@@ -78,7 +78,7 @@
             </configuration>
           </execution>
 
-          <!-- Optional: Run tests -->
+          <!-- Run tests -->
           <execution>
             <id>npm run test</id>
             <goals>
@@ -86,9 +86,7 @@
             </goals>
             <phase>test</phase>
             <configuration>
-              <arguments>run test -- --watch=false --browsers=ChromeHeadless</arguments>
-              <skip>true</skip>
-              <!-- Enable when tests are ready -->
+              <arguments>run test:ci</arguments>
             </configuration>
           </execution>
         </executions>

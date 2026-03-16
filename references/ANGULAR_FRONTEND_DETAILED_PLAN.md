@@ -1887,7 +1887,7 @@ describe('ApiService', () => {
 });
 ```
 
-### Step 6.2: Unit Tests for Feature Services
+### Step 5.2: Unit Tests for Feature Services
 
 **Create test for AuthorService:**
 
@@ -2014,7 +2014,7 @@ describe('AuthorService', () => {
 });
 ```
 
-### Step 6.3: Component Tests
+### Step 5.3: Component Tests
 
 **Create test for AuthorList component:**
 
@@ -2167,7 +2167,7 @@ describe('AuthorList', () => {
 });
 ```
 
-### Step 6.4: Guard Tests
+### Step 5.4: Guard Tests
 
 **Create test for Auth Guard:**
 
@@ -2250,7 +2250,7 @@ describe('authGuard', () => {
 });
 ```
 
-### Step 6.5: Interceptor Tests
+### Step 5.5: Interceptor Tests
 
 **Create test for Auth Interceptor:**
 
@@ -2397,7 +2397,7 @@ describe('errorInterceptor', () => {
 });
 ```
 
-### Step 6.6: Run Tests
+### Step 5.6: Run Tests
 
 **Run all tests:**
 
@@ -2492,7 +2492,7 @@ module.exports = function(config) {
 };
 ```
 
-### Step 6.7: Enable Tests in Maven Build
+### Step 5.7: Enable Tests in Maven Build
 
 Edit `frontend/pom.xml` to uncomment the test execution:
 
