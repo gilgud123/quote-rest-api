@@ -2,6 +2,11 @@ spring:
   application:
     name: quote-rest-api
 
+  # Java 21 Virtual Threads - Improves I/O throughput for REST API operations
+  threads:
+    virtual:
+      enabled: true
+
   datasource:
     url: jdbc:postgresql://localhost:5432/quotedb
     username: postgres

@@ -17,7 +17,7 @@ properties([
 pipeline {
     agent {
         docker {
-            image 'maven:3.9-eclipse-temurin-17'
+            image 'maven:3.9-eclipse-temurin-21'
             args '-v /var/run/docker.sock:/var/run/docker.sock -v maven-repo:/root/.m2 -u root'
             // Note: Docker CLI must be installed in the Maven container for docker compose commands
             // Network connectivity to services (Keycloak, PostgreSQL) handled via host networking
@@ -25,7 +25,7 @@ pipeline {
     }
 
     environment {
-        // Maven options (MaxPermSize removed - not needed in Java 17+)
+        // Maven options (MaxPermSize removed - not needed in Java 21+)
         MAVEN_OPTS = '-Xmx1024m'
         MAVEN_CLI_OPTS = '--batch-mode --errors --fail-at-end --show-version'
         
