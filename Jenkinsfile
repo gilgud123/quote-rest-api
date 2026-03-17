@@ -104,7 +104,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                echo '🔨 Building application (backend + frontend)...'
+                echo '🔨 Building application...'
                 sh """
                     mvn ${MAVEN_CLI_OPTS} clean compile \
                         -DskipTests
@@ -134,23 +134,6 @@ pipeline {
                 sh """
                     mvn ${MAVEN_CLI_OPTS} spotless:check
                 """
-            }
-        }
-
-        stage('Frontend Tests') {
-            steps {
-                echo '🧪 Running frontend tests...'
-                sh """
-                    cd frontend
-                    npm run test:ci
-                """
-            }
-            post {
-                always {
-                    // Publish Karma test results if available
-                    // Note: Karma outputs to a different location than Surefire
-                    junit testResults: 'frontend/test-results/**/*.xml', allowEmptyResults: true
-                }
             }
         }
 
@@ -192,16 +175,16 @@ pipeline {
 
         stage('Package') {
             steps {
-                echo '📦 Packaging application (backend + frontend)...'
+                echo '📦 Packaging application...'
                 sh """
-                    mvn ${MAVEN_CLI_OPTS} install \
+                    mvn ${MAVEN_CLI_OPTS} package \
                         -DskipTests
                 """
             }
             post {
                 success {
-                    // Archive the JAR files (backend and frontend)
-                    archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+                    // Archive the JAR file
+                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
                 }
             }
         }
@@ -211,7 +194,7 @@ pipeline {
                 echo '🐳 Building Docker image...'
                 script {
                     sh """
-                        docker build -f backend/Dockerfile -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
+                        docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
                         docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest
                     """
                 }
