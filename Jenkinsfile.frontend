@@ -70,6 +70,27 @@ pipeline {
                     else
                         echo "Docker CLI already installed"
                     fi
+                    
+                    # Install Node.js 22.x for Angular frontend
+                    if ! command -v node &> /dev/null; then
+                        echo "Installing Node.js 22.x..."
+                        apt-get update -qq
+                        apt-get install -y -qq ca-certificates curl gnupg
+                        mkdir -p /etc/apt/keyrings
+                        curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+                        echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+                        apt-get update -qq
+                        apt-get install -y -qq nodejs
+                        echo "Node.js installed successfully"
+                    else
+                        echo "Node.js already installed"
+                    fi
+                    
+                    # Verify installations
+                    echo "Verifying installations..."
+                    docker --version
+                    node --version
+                    npm --version
                 '''
             }
         }
