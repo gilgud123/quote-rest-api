@@ -44,8 +44,8 @@ public interface QuoteRepository extends JpaRepository<Quote, Long> {
       value =
           "SELECT q FROM Quote q WHERE "
               + "(:authorId IS NULL OR q.author.id = :authorId) AND "
-              + "(:category IS NULL OR LOWER(q.category) = LOWER(:category)) AND "
-              + "(:searchTerm IS NULL OR LOWER(q.text) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
+              + "(:category IS NULL OR LOWER(CAST(q.category AS string)) = LOWER(CAST(:category AS string))) AND "
+              + "(:searchTerm IS NULL OR LOWER(CAST(q.text AS string)) LIKE LOWER(CONCAT('%', CAST(:searchTerm AS string), '%')))")
   Page<Quote> findWithFilters(
       @Param("authorId") Long authorId,
       @Param("category") String category,

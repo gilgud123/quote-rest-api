@@ -11,9 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.katya.quoterestapi.config.TestSecurityConfig;
 import com.katya.quoterestapi.controller.AuthorController;
 import com.katya.quoterestapi.service.AuthorService;
 import com.katya.quoterestapi.service.QuoteService;
@@ -21,6 +24,8 @@ import com.katya.quoterestapi.service.QuoteService;
 /** Unit tests for GlobalExceptionHandler */
 @WebMvcTest(AuthorController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
+@Import(TestSecurityConfig.class)
 @DisplayName("GlobalExceptionHandler Unit Tests")
 class GlobalExceptionHandlerTest {
 

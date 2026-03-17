@@ -28,10 +28,10 @@ public class Author {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false, length = 100)
+  @Column(nullable = false, unique = true, columnDefinition = "VARCHAR(100)")
   private String name;
 
-  @Column(length = 1000)
+  @Column(columnDefinition = "VARCHAR(1000)")
   private String biography;
 
   @Column(name = "birth_year")

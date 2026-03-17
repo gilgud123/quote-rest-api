@@ -26,13 +26,13 @@ public class Quote {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false, length = 2000)
+  @Column(nullable = false, columnDefinition = "TEXT")
   private String text;
 
-  @Column(length = 500)
+  @Column(columnDefinition = "VARCHAR(500)")
   private String context;
 
-  @Column(length = 100)
+  @Column(columnDefinition = "VARCHAR(100)")
   private String category;
 
   @ManyToOne(fetch = FetchType.LAZY)

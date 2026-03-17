@@ -10,25 +10,19 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
+import com.katya.quoterestapi.config.BaseIntegrationTest;
 import com.katya.quoterestapi.dto.QuoteDTO;
 import com.katya.quoterestapi.entity.Author;
 import com.katya.quoterestapi.entity.Quote;
 import com.katya.quoterestapi.repository.AuthorRepository;
 import com.katya.quoterestapi.repository.QuoteRepository;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@TestPropertySource(
-    properties = {"spring.jpa.hibernate.ddl-auto=create-drop", "spring.sql.init.mode=never"})
 @DisplayName("QuoteService Integration Tests")
-class QuoteServiceIT {
+class QuoteServiceIT extends BaseIntegrationTest {
 
   @Autowired private QuoteService quoteService;
 
