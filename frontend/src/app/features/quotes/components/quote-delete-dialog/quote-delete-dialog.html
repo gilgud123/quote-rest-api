@@ -1,0 +1,21 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <h2>Delete Quote</h2>
+  </div>
+
+  <div class="dialog-content">
+    <p>Are you sure you want to delete this quote?</p>
+    <div class="quote-details">
+      <p class="quote-text">"{{ quote.text }}"</p>
+      @if (quote.authorName) {
+      <p class="quote-author">— {{ quote.authorName }}</p>
+      }
+    </div>
+    <p class="warning">This action cannot be undone.</p>
+  </div>
+
+  <div class="dialog-actions">
+    <button type="button" class="btn-secondary" (click)="onCancel()">Cancel</button>
+    <button type="button" class="btn-danger" (click)="onConfirm()">Delete</button>
+  </div>
+</div>

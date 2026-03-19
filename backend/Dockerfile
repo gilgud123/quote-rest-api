@@ -1,19 +1,21 @@
-# Multi-stage Dockerfile for Spring Boot Quote REST API
+# Multi-stage Dockerfile for Spring Boot Quote REST API (Multi-module structure)
 # Stage 1: Build the application
-FROM maven:3.9-eclipse-temurin-21 AS build
+FROM maven:3.9-eclipse-temurin-17 AS build
 
 WORKDIR /app
 
-# Copy pom.xml and download dependencies (cached layer)
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
+# Copy parent pom first
+COPY pom.xml ./pom.xml
 
-# Copy source code and build
-COPY src ./src
-RUN mvn clean package -DskipTests -B
+# Copy backend module
+COPY backend/pom.xml ./backend/pom.xml
+COPY backend/src ./backend/src
+
+# Build from parent directory - skip spotless check in Docker build
+RUN mvn clean install -pl backend -am -DskipTests -Dspotless.check.skip=true -B
 
 # Stage 2: Create the runtime image
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
@@ -22,7 +24,7 @@ RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring
 
 # Copy the JAR from build stage
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/backend/target/*.jar app.jar
 
 # Expose port
 EXPOSE 8080

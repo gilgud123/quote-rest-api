@@ -70,6 +70,27 @@ pipeline {
                     else
                         echo "Docker CLI already installed"
                     fi
+                    
+                    # Install Node.js 22.x for Angular frontend
+                    if ! command -v node &> /dev/null; then
+                        echo "Installing Node.js 22.x..."
+                        apt-get update -qq
+                        apt-get install -y -qq ca-certificates curl gnupg
+                        mkdir -p /etc/apt/keyrings
+                        curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+                        echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+                        apt-get update -qq
+                        apt-get install -y -qq nodejs
+                        echo "Node.js installed successfully"
+                    else
+                        echo "Node.js already installed"
+                    fi
+                    
+                    # Verify installations
+                    echo "Verifying installations..."
+                    docker --version
+                    node --version
+                    npm --version
                 '''
             }
         }
@@ -104,7 +125,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                echo '🔨 Building application...'
+                echo '🔨 Building application (backend + frontend)...'
                 sh """
                     mvn ${MAVEN_CLI_OPTS} clean compile \
                         -DskipTests
@@ -134,6 +155,23 @@ pipeline {
                 sh """
                     mvn ${MAVEN_CLI_OPTS} spotless:check
                 """
+            }
+        }
+
+        stage('Frontend Tests') {
+            steps {
+                echo '🧪 Running frontend tests...'
+                sh """
+                    cd frontend
+                    npm run test:ci
+                """
+            }
+            post {
+                always {
+                    // Publish Karma test results if available
+                    // Note: Karma outputs to a different location than Surefire
+                    junit testResults: 'frontend/test-results/**/*.xml', allowEmptyResults: true
+                }
             }
         }
 
@@ -175,16 +213,16 @@ pipeline {
 
         stage('Package') {
             steps {
-                echo '📦 Packaging application...'
+                echo '📦 Packaging application (backend + frontend)...'
                 sh """
-                    mvn ${MAVEN_CLI_OPTS} package \
+                    mvn ${MAVEN_CLI_OPTS} install \
                         -DskipTests
                 """
             }
             post {
                 success {
-                    // Archive the JAR file
-                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                    // Archive the JAR files (backend and frontend)
+                    archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
                 }
             }
         }
@@ -194,7 +232,7 @@ pipeline {
                 echo '🐳 Building Docker image...'
                 script {
                     sh """
-                        docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
+                        docker build -f backend/Dockerfile -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
                         docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest
                     """
                 }
