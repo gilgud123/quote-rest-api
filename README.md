@@ -246,6 +246,63 @@ After the app starts:
 
 ## Tests
 
+### Quick Test Run (Recommended)
+
+Use the provided scripts that automatically handle database setup, test execution, and cleanup:
+
+**Windows (PowerShell):**
+```powershell
+# Run all tests (backend + frontend)
+.\scripts\run-tests.ps1
+
+# Run backend tests only
+.\scripts\run-tests.ps1 -BackendOnly
+
+# Run frontend tests only
+.\scripts\run-tests.ps1 -FrontendOnly
+
+# Run backend tests, skip frontend
+.\scripts\run-tests.ps1 -SkipFrontend
+```
+
+**Linux/Mac (Bash):**
+```bash
+# Run all tests (backend + frontend)
+./scripts/run-tests.sh
+
+# Run backend tests only
+./scripts/run-tests.sh --backend-only
+
+# Run frontend tests only
+./scripts/run-tests.sh --frontend-only
+
+# Run backend tests, skip frontend
+./scripts/run-tests.sh --skip-frontend
+```
+
+The scripts will:
+- ✅ Check Docker is running
+- ✅ Start PostgreSQL test database (port 5434)
+- ✅ Wait for database to be ready
+- ✅ Run tests with Maven/npm
+- ✅ Display coverage report locations
+- ✅ **Clean up**: Stop and remove test database container and volumes
+
+**Note**: The test database is automatically cleaned up after each run for a fresh start next time.
+
+### Manual Test Run
+
+If you prefer to run tests manually:
+
+**Prerequisites**: Backend integration tests require PostgreSQL to be running. Start the database first:
+
+```powershell
+# Start PostgreSQL container
+docker compose up -d postgres
+
+# Wait for database to be ready (check with docker ps)
+```
+
 Run all tests (backend and frontend):
 
 ```powershell
@@ -259,7 +316,7 @@ cd backend
 mvn test
 ```
 
-Run frontend tests only:
+Run frontend tests only (no database required):
 
 ```powershell
 cd frontend

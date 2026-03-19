@@ -1,12 +1,15 @@
 # Development Scripts
 
-Helper scripts for frontend development workflow.
+Helper scripts for development, testing, and deployment workflows.
 
 ## Quick Start
 
 ### Windows (PowerShell)
 
 ```powershell
+# Run all tests
+.\scripts\run-tests.ps1
+
 # Start all backend services and frontend dev server
 .\scripts\start-frontend-dev.ps1
 
@@ -23,6 +26,9 @@ Helper scripts for frontend development workflow.
 ### Linux/Mac (Bash)
 
 ```bash
+# Run all tests
+./scripts/run-tests.sh
+
 # Start all backend services and frontend dev server
 ./scripts/start-frontend-dev.sh
 
@@ -37,6 +43,37 @@ Helper scripts for frontend development workflow.
 ```
 
 ## Available Scripts
+
+### Run Tests
+
+**Windows:** `run-tests.ps1`  
+**Linux/Mac:** `run-tests.sh`
+
+Automated test runner that handles the complete test lifecycle:
+- ✅ Checks Docker is running
+- ✅ Starts PostgreSQL test database (port 5434)
+- ✅ Waits for database to be ready
+- ✅ Runs backend tests with Maven
+- ✅ Runs frontend tests with npm
+- ✅ Displays coverage report locations
+- ✅ **Cleans up**: Stops and removes test database container and volumes
+
+**Options:**
+```powershell
+# Windows
+.\scripts\run-tests.ps1              # All tests
+.\scripts\run-tests.ps1 -BackendOnly # Backend only
+.\scripts\run-tests.ps1 -FrontendOnly # Frontend only
+.\scripts\run-tests.ps1 -SkipFrontend # Backend only (same as BackendOnly)
+
+# Linux/Mac
+./scripts/run-tests.sh                # All tests
+./scripts/run-tests.sh --backend-only # Backend only
+./scripts/run-tests.sh --frontend-only # Frontend only
+./scripts/run-tests.sh --skip-frontend # Backend only (same as backend-only)
+```
+
+**Note**: The test database is automatically created and destroyed with each test run for complete isolation.
 
 ### Start Development Environment
 
