@@ -26,12 +26,12 @@ Full-stack application for managing authors and their quotes. Backend built with
 
 ### Backend
 
-- Spring Boot 3.2.1
-- Java 17
+- Spring Boot 3.4.5
+- Java 21
 - Spring Security with OAuth2 Resource Server
 - PostgreSQL (runtime), H2 (tests)
-- MapStruct, Lombok, Hibernate
-- Maven, JaCoCo
+- MapStruct 1.6.3, Lombok 1.18.36, Hibernate
+- Maven (multi-module), JaCoCo, Testcontainers 1.20.4
 
 ### Frontend
 
@@ -44,15 +44,32 @@ Full-stack application for managing authors and their quotes. Backend built with
 
 ## Prerequisites
 
-- Java 17+ (aligned with `pom.xml`)
+- Java 21+ (aligned with `pom.xml`)
 - Maven 3.6+
 - Node.js 22.12+ (for frontend)
 - Docker & Docker Compose (for full stack)
 - PostgreSQL 12+ (or use Docker)
 
+## Project Structure
+
+This is a **multi-module Maven project** with the following structure:
+
+```
+quote-rest-api/
+├── backend/              # Spring Boot REST API
+│   ├── src/
+│   └── pom.xml
+├── frontend/             # Angular 20 application
+│   ├── src/
+│   └── pom.xml
+├── pom.xml              # Parent POM
+├── docker-compose.yml   # Full stack (backend only)
+└── docker-compose-frontend.yml  # Full stack with frontend support
+```
+
 ## Configuration
 
-Default database settings live in `src/main/resources/application.yml`.
+Default database settings live in `backend/src/main/resources/application.yml`.
 
 ### Local PostgreSQL
 
@@ -63,14 +80,39 @@ Update the datasource values if needed:
 
 ### Schema and Sample Data
 
-- `src/main/resources/schema.sql`
-- `src/main/resources/data.sql`
+- `backend/src/main/resources/schema.sql`
+- `backend/src/main/resources/data.sql`
 
-## Run Locally
+## Build the Project
+
+Build the entire multi-module project:
 
 ```powershell
 cd "C:\Users\Katya de Vries\IdeaProjects\quote-rest-api"
+mvn clean install
+```
+
+Build only the backend module:
+
+```powershell
+cd backend
+mvn clean install
+```
+
+## Run Locally
+
+Run the backend API:
+
+```powershell
+cd "C:\Users\Katya de Vries\IdeaProjects\quote-rest-api\backend"
 mvn spring-boot:run
+```
+
+Or from the root:
+
+```powershell
+cd "C:\Users\Katya de Vries\IdeaProjects\quote-rest-api"
+mvn spring-boot:run -pl backend
 ```
 
 ## Run with Docker
@@ -138,7 +180,7 @@ mvn spotless:apply -pl frontend
 2. **Frontend changes**: Auto-reload with `ng serve` hot module replacement (HMR)
 3. **Keycloak changes**: Edit `keycloak/realm-quote-frontend.json` and restart Keycloak container
 
-### Project Structure
+### Frontend Module Structure
 
 ```
 frontend/
@@ -152,7 +194,7 @@ frontend/
 │   └── styles.scss         # Global styles
 ├── angular.json            # Angular CLI config
 ├── package.json            # npm dependencies
-└── pom.xml                 # Maven integration
+└── pom.xml                 # Maven integration for frontend module
 ```
 
 ### Testing
@@ -204,16 +246,36 @@ After the app starts:
 
 ## Tests
 
+Run all tests (backend and frontend):
+
 ```powershell
 mvn test
 ```
 
+Run backend tests only:
+
+```powershell
+cd backend
+mvn test
+```
+
+Run frontend tests only:
+
+```powershell
+cd frontend
+npm test
+```
+
 ### Coverage
 
-JaCoCo report:
+Backend JaCoCo report:
 
-- HTML: `target/site/jacoco/index.html`
-- XML: `target/site/jacoco/jacoco.xml`
+- HTML: `backend/target/site/jacoco/index.html`
+- XML: `backend/target/site/jacoco/jacoco.xml`
+
+Frontend Karma coverage report:
+
+- HTML: `frontend/coverage/quote-frontend/index.html`
 
 ## Code Formatting
 
