@@ -1,32 +1,54 @@
 # Quote REST API
 
-REST API for managing authors and their quotes. Built with Spring Boot, JPA, PostgreSQL, MapStruct, and validation.
+Full-stack application for managing authors and their quotes. Backend built with Spring Boot, frontend with Angular 20, secured with Keycloak OAuth2/JWT.
 
 ## Features
 
-- CRUD for authors and quotes
-- Pagination, filtering, and search
-- Validation and global error handling
-- Swagger/OpenAPI docs
-- Unit and integration tests
-- JaCoCo coverage reporting
-- Code formatting with Spotless
-- MCP servers for AI-assisted development (Playwright & PostgreSQL)
+- **Backend API**:
+  - CRUD for authors and quotes
+  - Pagination, filtering, and search
+  - Validation and global error handling
+  - Swagger/OpenAPI docs
+  - Unit and integration tests
+  - JaCoCo coverage reporting
+- **Frontend UI**:
+  - Angular 20 with standalone components
+  - Keycloak OAuth2 authentication
+  - Lazy-loaded feature modules
+  - Complete CRUD with responsive UI
+  - 81 unit tests with 79% coverage
+- **Infrastructure**:
+  - Code formatting with Spotless
+  - Docker Compose for development
+  - MCP servers for AI-assisted development
 
 ## Tech Stack
 
+### Backend
+
 - Spring Boot 3.2.1
-- Java (project configured for 17 in `pom.xml`)
-- PostgreSQL (runtime)
-- H2 (tests)
+- Java 17
+- Spring Security with OAuth2 Resource Server
+- PostgreSQL (runtime), H2 (tests)
 - MapStruct, Lombok, Hibernate
 - Maven, JaCoCo
+
+### Frontend
+
+- Angular 20
+- TypeScript 5.9.2
+- Keycloak JS 26.2.3
+- RxJS, Standalone Components
+- Karma + Jasmine for testing
+- Node.js 22.12, npm 10.9
 
 ## Prerequisites
 
 - Java 17+ (aligned with `pom.xml`)
 - Maven 3.6+
-- PostgreSQL 12+ (or Docker)
+- Node.js 22.12+ (for frontend)
+- Docker & Docker Compose (for full stack)
+- PostgreSQL 12+ (or use Docker)
 
 ## Configuration
 
@@ -60,6 +82,114 @@ docker compose up --build
 
 After startup, Keycloak is available at `http://localhost:8081`.
 
+## Frontend Development
+
+### Quick Start
+
+Start the full development environment with backend, Keycloak, and PostgreSQL:
+
+```powershell
+# Terminal 1: Start all backend services
+docker-compose -f docker-compose-frontend.yml up -d
+
+# Wait for services to be healthy (check with docker ps)
+# Terminal 2: Start Angular development server
+cd frontend
+npm install  # First time only
+npm start
+```
+
+### Access Points
+
+- **Frontend UI**: http://localhost:4200
+- **Backend API**: http://localhost:8080/api/v1
+- **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **Keycloak Admin**: http://localhost:9090 (admin/admin)
+
+### Test Users
+
+Pre-configured in the Keycloak realm:
+- **frontend-user** / **password** - Regular user (USER role)
+- **frontend-admin** / **password** - Admin user (ADMIN role)
+
+### Frontend Commands
+
+```powershell
+cd frontend
+
+# Development server with hot reload
+npm start
+
+# Run tests
+npm test                 # Interactive watch mode
+npm run test:ci         # Single run (for CI)
+npm run test:coverage   # With coverage report
+
+# Build for production
+npm run build
+
+# Lint and format
+mvn spotless:apply -pl frontend
+```
+
+### Development Workflow
+
+1. **Backend changes**: Modify code, then restart backend container or run Spring Boot locally
+2. **Frontend changes**: Auto-reload with `ng serve` hot module replacement (HMR)
+3. **Keycloak changes**: Edit `keycloak/realm-quote-frontend.json` and restart Keycloak container
+
+### Project Structure
+
+```
+frontend/
+├── src/
+│   ├── app/
+│   │   ├── core/           # Services, guards, interceptors, models
+│   │   ├── features/       # Authors and Quotes modules
+│   │   ├── shared/         # Shared components
+│   │   └── app.routes.ts   # Main routing
+│   ├── environments/       # Environment configs
+│   └── styles.scss         # Global styles
+├── angular.json            # Angular CLI config
+├── package.json            # npm dependencies
+└── pom.xml                 # Maven integration
+```
+
+### Testing
+
+Frontend has 81 unit tests with ~79% coverage:
+- Core services (auth, api)
+- Feature services (authors, quotes)
+- Components (lists, forms, dialogs)
+- Guards and interceptors
+
+```powershell
+# Run tests with coverage
+cd frontend
+npm run test:coverage
+
+# View coverage report
+start coverage/quote-frontend/index.html
+```
+
+### Troubleshooting
+
+**Port conflicts:**
+- Frontend dev server uses port 4200
+- Backend uses port 8080
+- Keycloak uses port 9090
+- PostgreSQL uses port 5433
+
+**Keycloak connection issues:**
+- Ensure Keycloak is healthy: `docker ps`
+- Check realm import: `docker logs quote-keycloak-frontend`
+- Verify realm config: `keycloak/realm-quote-frontend.json`
+
+**Build issues:**
+- Clear npm cache: `npm clean-install`
+- Clear Maven cache: `mvn clean`
+- Restart Docker services: `docker-compose -f docker-compose-frontend.yml restart`
+
 ## Verify schema/data load
 
 ```powershell
@@ -87,7 +217,7 @@ JaCoCo report:
 
 ## Code Formatting
 
-This project uses **Spotless** to enforce consistent code formatting. See [SPOTLESS.md](SPOTLESS.md) for details.
+This project uses **Spotless** to enforce consistent code formatting. See [SPOTLESS.md](references/SPOTLESS.md) for details.
 
 ```powershell
 # Apply formatting to all files
@@ -144,8 +274,8 @@ This project includes a complete Jenkins CI/CD pipeline for automated builds, te
 
 ### Documentation
 
-- **[JENKINS_SETUP.md](./JENKINS_SETUP.md)** - Installation and configuration
-- **[JENKINS_PIPELINE_GUIDE.md](./JENKINS_PIPELINE_GUIDE.md)** - Pipeline usage and troubleshooting
+- **[JENKINS_SETUP.md](references/JENKINS_SETUP.md)** - Installation and configuration
+- **[JENKINS_PIPELINE_GUIDE.md](references/JENKINS_PIPELINE_GUIDE.md)** - Pipeline usage and troubleshooting
 
 ### Pipeline Stages
 

@@ -1,0 +1,91 @@
+<div class="quote-create-container">
+  <h1>Create New Quote</h1>
+
+  @if (error) {
+  <div class="error">{{ error }}</div>
+  } @if (isLoadingAuthors) {
+  <div class="loading">Loading authors...</div>
+  } @else {
+  <form [formGroup]="quoteForm" (ngSubmit)="onSubmit()">
+    <div class="form-field">
+      <label for="text">Quote Text *</label>
+      <textarea
+        id="text"
+        formControlName="text"
+        placeholder="Enter the quote text"
+        rows="4"
+      ></textarea>
+      @if (text?.invalid && text?.touched) {
+      <div class="error-message">
+        @if (text?.errors?.['required']) {
+        <span>Quote text is required</span>
+        } @if (text?.errors?.['minlength']) {
+        <span>Quote text must be at least 5 characters</span>
+        } @if (text?.errors?.['maxlength']) {
+        <span>Quote text must not exceed 1000 characters</span>
+        }
+      </div>
+      }
+    </div>
+
+    <div class="form-field">
+      <label for="authorId">Author *</label>
+      <select id="authorId" formControlName="authorId">
+        <option [ngValue]="null">Select an author</option>
+        @for (author of authors; track author.id) {
+        <option [value]="author.id">{{ author.name }}</option>
+        }
+      </select>
+      @if (authorId?.invalid && authorId?.touched) {
+      <div class="error-message">
+        @if (authorId?.errors?.['required']) {
+        <span>Author is required</span>
+        }
+      </div>
+      }
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label for="context">Context</label>
+        <input id="context" type="text" formControlName="context" placeholder="e.g., Symposium" />
+        @if (context?.invalid && context?.touched) {
+        <div class="error-message">
+          @if (context?.errors?.['maxlength']) {
+          <span>Context must not exceed 255 characters</span>
+          }
+        </div>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="category">Category</label>
+        <input
+          id="category"
+          type="text"
+          formControlName="category"
+          placeholder="e.g., Philosophy"
+        />
+        @if (category?.invalid && category?.touched) {
+        <div class="error-message">
+          @if (category?.errors?.['maxlength']) {
+          <span>Category must not exceed 50 characters</span>
+          }
+        </div>
+        }
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="onCancel()">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="quoteForm.invalid || isSubmitting">
+        @if (isSubmitting) {
+        <span>Creating...</span>
+        } @else {
+        <span>Create Quote</span>
+        }
+      </button>
+    </div>
+  </form>
+  }
+</div>

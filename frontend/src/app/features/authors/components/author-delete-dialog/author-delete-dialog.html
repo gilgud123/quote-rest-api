@@ -1,0 +1,21 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <h2>Delete Author</h2>
+  </div>
+
+  <div class="dialog-content">
+    <p>Are you sure you want to delete this author?</p>
+    <div class="author-details">
+      <strong>{{ author.name }}</strong>
+      @if (author.birthYear || author.deathYear) {
+      <span class="years"> ({{ author.birthYear || '?' }} - {{ author.deathYear || '?' }}) </span>
+      }
+    </div>
+    <p class="warning">This action cannot be undone.</p>
+  </div>
+
+  <div class="dialog-actions">
+    <button type="button" class="btn-secondary" (click)="onCancel()">Cancel</button>
+    <button type="button" class="btn-danger" (click)="onConfirm()">Delete</button>
+  </div>
+</div>

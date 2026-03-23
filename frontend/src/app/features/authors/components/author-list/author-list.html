@@ -1,0 +1,64 @@
+<div class="author-list-container">
+  <div class="header">
+    <h1>Authors</h1>
+    <button class="btn-primary" (click)="createAuthor()">Add New Author</button>
+  </div>
+
+  @if (loading) {
+  <div class="loading">Loading authors...</div>
+  } @if (error) {
+  <div class="error">{{ error }}</div>
+  } @if (!loading && !error) {
+  <table class="authors-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Biography</th>
+        <th>Birth Year</th>
+        <th>Death Year</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (author of authors; track author.id) {
+      <tr>
+        <td>{{ author.id }}</td>
+        <td>{{ author.name }}</td>
+        <td>
+          @if (author.biography) {
+          {{ author.biography.substring(0, 100) }}{{ author.biography.length > 100 ? '...' : '' }}
+          } @else { - }
+        </td>
+        <td>{{ author.birthYear || '-' }}</td>
+        <td>{{ author.deathYear || '-' }}</td>
+        <td class="actions">
+          <button class="btn-icon btn-edit" (click)="editAuthor(author)" title="Edit">✏️</button>
+          <button class="btn-icon btn-delete" (click)="openDeleteDialog(author)" title="Delete">
+            🗑️
+          </button>
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+
+  <div class="pagination">
+    <button (click)="previousPage()" [disabled]="!hasPreviousPage">Previous</button>
+    <span class="page-info">
+      Showing {{ currentPageStart }} - {{ currentPageEnd }} of {{ totalElements }}
+    </span>
+    <button (click)="nextPage()" [disabled]="!hasNextPage">Next</button>
+  </div>
+  } @if (showDeleteDialog && authorToDelete) {
+  <div class="dialog-overlay" (click)="cancelDelete()">
+    <div class="dialog-wrapper" (click)="$event.stopPropagation()">
+      <app-author-delete-dialog
+        [author]="authorToDelete"
+        (confirm)="confirmDelete()"
+        (cancel)="cancelDelete()"
+      ></app-author-delete-dialog>
+    </div>
+  </div>
+  }
+</div>

@@ -1,0 +1,21 @@
+<div class="app-container">
+  <nav class="navbar">
+    <div class="nav-brand">
+      <h1>{{ title }}</h1>
+    </div>
+    <div class="nav-links">
+      <a routerLink="/authors" routerLinkActive="active">Authors</a>
+      <a routerLink="/quotes" routerLinkActive="active">Quotes</a>
+    </div>
+    <div class="nav-user">
+      @if (isAuthenticated) {
+      <span class="user-info">{{ username }}</span>
+      <button class="btn-logout" (click)="logout()">Logout</button>
+      }
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <router-outlet />
+  </main>
+</div>
