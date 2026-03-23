@@ -11,6 +11,9 @@ COPY pom.xml ./pom.xml
 COPY backend/pom.xml ./backend/pom.xml
 COPY backend/src ./backend/src
 
+# Copy frontend pom to satisfy parent module requirements (not building frontend here)
+COPY frontend/pom.xml ./frontend/pom.xml
+
 # Build from parent directory - skip spotless check in Docker build
 RUN mvn clean install -pl backend -am -DskipTests -Dspotless.check.skip=true -B
 

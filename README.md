@@ -36,8 +36,8 @@ Full-stack application for managing authors and their quotes. Backend built with
 ### Frontend
 
 - Angular 20
-- TypeScript 5.7
-- Keycloak JS 26.0.7
+- TypeScript 5.9.2
+- Keycloak JS 26.2.3
 - RxJS, Standalone Components
 - Karma + Jasmine for testing
 - Node.js 22.12, npm 10.9

@@ -31,7 +31,7 @@
     <div class="form-field">
       <label for="authorId">Author *</label>
       <select id="authorId" formControlName="authorId">
-        <option [value]="null">Select an author</option>
+        <option [ngValue]="null">Select an author</option>
         @for (author of authors; track author.id) {
         <option [value]="author.id">{{ author.name }}</option>
         }
