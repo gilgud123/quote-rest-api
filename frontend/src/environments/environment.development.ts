@@ -3,7 +3,7 @@ export const environment = {
   apiUrl: '/api/v1', // Uses proxy
   keycloak: {
     url: 'http://localhost:9090',
-    realm: 'quote-api-realm',
+    realm: 'quote',
     clientId: 'quote-frontend',
   },
 };
