@@ -10,6 +10,7 @@ import { AuthorDeleteDialog } from '../author-delete-dialog/author-delete-dialog
   imports: [CommonModule, AuthorDeleteDialog],
   templateUrl: './author-list.html',
   styleUrl: './author-list.scss',
+  standalone: true,
 })
 export class AuthorList implements OnInit {
   authors: Author[] = [];

@@ -10,6 +10,7 @@ import { QuoteDeleteDialog } from '../quote-delete-dialog/quote-delete-dialog';
   imports: [CommonModule, QuoteDeleteDialog],
   templateUrl: './quote-list.html',
   styleUrl: './quote-list.scss',
+  standalone: true,
 })
 export class QuoteList implements OnInit {
   quotes: Quote[] = [];

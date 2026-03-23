@@ -11,6 +11,7 @@ import { Quote, Author } from '../../../../core/models';
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './quote-create.html',
   styleUrl: './quote-create.scss',
+  standalone: true,
 })
 export class QuoteCreate implements OnInit {
   quoteForm!: FormGroup;

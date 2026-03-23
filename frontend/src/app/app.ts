@@ -8,6 +8,7 @@ import { keycloak } from './app.config';
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './app.html',
   styleUrl: './app.scss',
+  standalone: true,
 })
 export class App implements OnInit {
   title = 'Quote REST API';

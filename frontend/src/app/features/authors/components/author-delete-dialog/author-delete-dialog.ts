@@ -7,6 +7,7 @@ import { Author } from '../../../../core/models';
   imports: [CommonModule],
   templateUrl: './author-delete-dialog.html',
   styleUrl: './author-delete-dialog.scss',
+  standalone: true,
 })
 export class AuthorDeleteDialog {
   @Input() author!: Author;

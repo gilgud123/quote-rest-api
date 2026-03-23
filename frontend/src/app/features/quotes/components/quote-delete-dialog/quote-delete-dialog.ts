@@ -7,6 +7,7 @@ import { Quote } from '../../../../core/models';
   imports: [CommonModule],
   templateUrl: './quote-delete-dialog.html',
   styleUrl: './quote-delete-dialog.scss',
+  standalone: true,
 })
 export class QuoteDeleteDialog {
   @Input() quote!: Quote;

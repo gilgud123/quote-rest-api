@@ -10,6 +10,7 @@ import { Author } from '../../../../core/models';
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './author-create.html',
   styleUrl: './author-create.scss',
+  standalone: true,
 })
 export class AuthorCreate implements OnInit {
   authorForm!: FormGroup;
