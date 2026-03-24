@@ -46,6 +46,7 @@ Create an upbeat daily status report for the repo as a GitHub issue.
 - Progress tracking, goal reminders and highlights
 - Project status and recommendations
 - Actionable next steps for maintainers
+- changes to CI setup, testing, code formatting, or MCP servers
 
 ## Style
 
