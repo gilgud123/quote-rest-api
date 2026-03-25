@@ -50,9 +50,17 @@ Full-stack application for managing authors and their quotes. Backend built with
 - Docker & Docker Compose (for full stack)
 - PostgreSQL 12+ (or use Docker)
 
+## Project Structure
+
+This is a **multi-module Maven project** with two modules:
+- **backend**: Spring Boot REST API (`backend/`)
+- **frontend**: Angular 20 web application (`frontend/`)
+
+The parent POM (`pom.xml`) coordinates both modules for unified builds.
+
 ## Configuration
 
-Default database settings live in `src/main/resources/application.yml`.
+Default database settings live in `backend/src/main/resources/application.yml`.
 
 ### Local PostgreSQL
 
@@ -63,13 +71,18 @@ Update the datasource values if needed:
 
 ### Schema and Sample Data
 
-- `src/main/resources/schema.sql`
-- `src/main/resources/data.sql`
+- `backend/src/main/resources/schema.sql`
+- `backend/src/main/resources/data.sql`
 
 ## Run Locally
 
 ```powershell
+# Run backend only (from project root)
 cd "C:\Users\Katya de Vries\IdeaProjects\quote-rest-api"
+mvn spring-boot:run -pl backend
+
+# Or from backend directory
+cd backend
 mvn spring-boot:run
 ```
 
@@ -205,23 +218,36 @@ After the app starts:
 ## Tests
 
 ```powershell
+# Test all modules (backend and frontend)
 mvn test
+
+# Test backend only
+mvn test -pl backend
+
+# Test frontend only
+mvn test -pl frontend
 ```
 
 ### Coverage
 
-JaCoCo report:
+**Backend** JaCoCo report:
+- HTML: `backend/target/site/jacoco/index.html`
+- XML: `backend/target/site/jacoco/jacoco.xml`
 
-- HTML: `target/site/jacoco/index.html`
-- XML: `target/site/jacoco/jacoco.xml`
+**Frontend** Karma coverage report:
+- HTML: `frontend/coverage/quote-frontend/index.html`
 
 ## Code Formatting
 
 This project uses **Spotless** to enforce consistent code formatting. See [SPOTLESS.md](references/SPOTLESS.md) for details.
 
 ```powershell
-# Apply formatting to all files
+# Apply formatting to all modules (backend, frontend, parent POM)
 mvn spotless:apply
+
+# Apply formatting to specific module
+mvn spotless:apply -pl backend
+mvn spotless:apply -pl frontend
 
 # Check formatting (runs automatically during verify phase)
 mvn spotless:check
@@ -287,9 +313,28 @@ This project includes a complete Jenkins CI/CD pipeline for automated builds, te
 
 **Total Duration**: ~8-12 minutes
 
+## Maven Multi-Module Commands
+
+```powershell
+# Build all modules from root
+mvn clean install
+
+# Build specific module
+mvn clean install -pl backend
+mvn clean install -pl frontend
+
+# Build backend and its dependencies
+mvn clean install -pl backend -am
+
+# Skip tests
+mvn clean install -DskipTests
+```
+
 ## Notes
 
-- Integration tests in this project use H2 and Spring Boot test context with seeded data.
+- This is a **multi-module Maven project** with backend and frontend modules coordinated by a parent POM.
+- Backend integration tests use H2 and Spring Boot test context with seeded data.
+- Frontend tests use Karma + Jasmine with 81 unit tests and ~79% coverage.
 - If you switch integration tests to Testcontainers, update the test configuration accordingly.
 
 ## Keycloak (Step 9)

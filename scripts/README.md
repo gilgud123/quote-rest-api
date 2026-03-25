@@ -38,7 +38,9 @@ Helper scripts for frontend development workflow.
 
 ## Available Scripts
 
-### Start Development Environment
+### Core Development Scripts
+
+#### Start Development Environment
 
 **Windows:** `start-frontend-dev.ps1`  
 **Linux/Mac:** `start-frontend-dev.sh`
@@ -108,6 +110,62 @@ Restarts a specific service without affecting others.
 ```bash
 # After making backend code changes
 ./scripts/restart-service.sh backend
+```
+
+### Backend-Only Scripts
+
+For running the backend without the frontend dev server:
+
+#### Start Backend Services
+
+**Windows:** `start-docker.ps1`  
+**Linux/Mac:** `start-docker.sh`
+
+Starts PostgreSQL, Keycloak, and Backend API in Docker without the Angular dev server.
+
+#### Stop Backend Services
+
+**Windows:** `stop-docker.ps1`  
+**Linux/Mac:** `stop-docker.sh`
+
+Stops all backend Docker services.
+
+### Database Scripts
+
+#### Initialize Database
+
+**Windows:** `init-db.ps1`  
+**Linux/Mac:** `init-db.sh`
+
+Manually initialize or reset the database schema and data.
+
+**Usage:**
+```bash
+# Initialize fresh database
+./scripts/init-db.sh
+
+# Verify database contents
+docker exec -i quote-postgres psql -U quoteuser -d quotedb -f /docker-entrypoint-initdb.d/verify-db.sql
+```
+
+### Jenkins Scripts
+
+Located in `scripts/jenkins/`:
+
+- **`jenkins-docker.ps1`** - Manage Jenkins Docker container (start, stop, restart, logs, password)
+- **`wait-for-services.sh`** - Wait for services to be healthy (used in CI/CD)
+- **`cleanup-docker.sh`** - Clean up Docker resources
+
+**Example:**
+```bash
+# Start Jenkins
+./scripts/jenkins/jenkins-docker.ps1 start
+
+# Get initial admin password
+./scripts/jenkins/jenkins-docker.ps1 password
+
+# View logs
+./scripts/jenkins/jenkins-docker.ps1 logs
 ```
 
 ## Access Points
@@ -293,5 +351,7 @@ npm run build
 ## Jenkins Integration
 
 These scripts complement the Jenkins CI/CD pipeline. See:
-- `Jenkinsfile` - Complete build pipeline
+- `Jenkinsfile` - Backend build pipeline
+- `Jenkinsfile.frontend` - Frontend build pipeline
 - `references/JENKINS_PIPELINE_GUIDE.md` - Pipeline documentation
+- `references/JENKINS_SETUP.md` - Jenkins setup guide
