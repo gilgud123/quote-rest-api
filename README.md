@@ -52,7 +52,7 @@ Full-stack application for managing authors and their quotes. Backend built with
 
 ## Configuration
 
-Default database settings live in `src/main/resources/application.yml`.
+Default database settings live in `backend/src/main/resources/application.yml`.
 
 ### Local PostgreSQL
 
@@ -63,14 +63,14 @@ Update the datasource values if needed:
 
 ### Schema and Sample Data
 
-- `src/main/resources/schema.sql`
-- `src/main/resources/data.sql`
+- `backend/src/main/resources/schema.sql`
+- `backend/src/main/resources/data.sql`
 
 ## Run Locally
 
 ```powershell
 cd "C:\Users\Katya de Vries\IdeaProjects\quote-rest-api"
-mvn spring-boot:run
+mvn spring-boot:run -pl backend
 ```
 
 ## Run with Docker
@@ -205,15 +205,15 @@ After the app starts:
 ## Tests
 
 ```powershell
-mvn test
+mvn test -pl backend
 ```
 
 ### Coverage
 
 JaCoCo report:
 
-- HTML: `target/site/jacoco/index.html`
-- XML: `target/site/jacoco/jacoco.xml`
+- HTML: `backend/target/site/jacoco/index.html`
+- XML: `backend/target/site/jacoco/jacoco.xml`
 
 ## Code Formatting
 

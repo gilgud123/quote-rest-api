@@ -31,7 +31,7 @@ Configure via `app.security.keycloak.accepted-issuers` in application.yml
 
 Create or configure a client in the `quote` realm. Recommended settings for Angular:
 
-- **Client ID:** `quote-api` (matches `app.security.keycloak.client-id`)
+- **Client ID:** `quote-frontend` (the Angular SPA client; the backend uses `quote-api` for JWT validation)
 - **Client type:** Public (SPAs cannot securely store client secrets)
 - **Standard flow:** Enabled (Authorization Code with PKCE)
 - **Direct access grants:** Disabled (not recommended for SPAs; enable only for backend/CLI testing)
@@ -61,9 +61,9 @@ Create a small auth service. Example using `keycloak-js` directly:
 import Keycloak from 'keycloak-js';
 
 const keycloakConfig = {
-  url: 'http://localhost:8081',
+  url: 'http://localhost:9090',
   realm: 'quote',
-  clientId: 'quote-api',
+  clientId: 'quote-frontend',
 };
 
 class KeycloakService {
@@ -198,8 +198,8 @@ const canWrite = roles.includes('ADMIN');
 Base URLs:
 
 - **API:** `http://localhost:8080/api/v1`
-- **Keycloak:** `http://localhost:8081`
-- **Token issuer:** `http://localhost:8081/realms/quote`
+- **Keycloak (frontend dev):** `http://localhost:9090`
+- **Token issuer (frontend dev):** `http://localhost:9090/realms/quote`
 - **Swagger UI:** `http://localhost:8080/swagger-ui.html`
 
 Example API calls:
@@ -253,7 +253,7 @@ Ensure `quote-api` client has `http://localhost:4200` in the **Web Origins** set
 ## 9) Quick troubleshooting
 
 **401 Unauthorized on API calls:**
-- Verify the token issuer (`iss` claim) matches accepted issuers: `http://localhost:8081/realms/quote`
+- Verify the token issuer (`iss` claim) matches accepted issuers. For the frontend dev environment (`docker-compose-frontend.yml`), the issuer is `http://localhost:9090/realms/quote`. For the backend-only Docker setup (`docker-compose.yml`), the issuer is `http://localhost:8081/realms/quote`.
 - Check roles in JWT: use [jwt.io](https://jwt.io) to decode token and verify `realm_access.roles` or `resource_access.quote-api.roles` includes `USER` or `ADMIN`
 - Ensure token hasn't expired: check `exp` claim
 - Verify Bearer token is sent: `Authorization: Bearer <token>`
