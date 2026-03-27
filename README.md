@@ -52,7 +52,7 @@ Full-stack application for managing authors and their quotes. Backend built with
 
 ## Configuration
 
-Default database settings live in `src/main/resources/application.yml`.
+Default database settings live in `backend/src/main/resources/application.yml`.
 
 ### Local PostgreSQL
 
@@ -63,8 +63,8 @@ Update the datasource values if needed:
 
 ### Schema and Sample Data
 
-- `src/main/resources/schema.sql`
-- `src/main/resources/data.sql`
+- `backend/src/main/resources/schema.sql`
+- `backend/src/main/resources/data.sql`
 
 ## Run Locally
 

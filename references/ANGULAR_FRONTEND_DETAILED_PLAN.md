@@ -49,14 +49,13 @@ quote-rest-api/
 │   ├── proxy.conf.json
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── app.component.ts
+│   │   │   ├── app.ts
 │   │   │   ├── app.config.ts
 │   │   │   ├── app.routes.ts
 │   │   │   ├── core/
 │   │   │   │   ├── services/
 │   │   │   │   │   ├── auth.service.ts
-│   │   │   │   │   ├── api.service.ts
-│   │   │   │   │   └── error.service.ts
+│   │   │   │   │   └── api.service.ts
 │   │   │   │   ├── guards/
 │   │   │   │   │   └── auth.guard.ts
 │   │   │   │   ├── interceptors/
@@ -84,20 +83,14 @@ quote-rest-api/
 │   │   │   │           ├── quote-create/
 │   │   │   │           ├── quote-edit/
 │   │   │   │           └── quote-delete-dialog/
-│   │   │   ├── shared/
-│   │   │   │   ├── components/
-│   │   │   │   │   ├── confirm-dialog/
-│   │   │   │   │   ├── loading-spinner/
-│   │   │   │   │   └── error-message/
-│   │   │   │   └── pipes/
-│   │   │   │       └── truncate.pipe.ts
-│   │   │   └── layouts/
-│   │   │       ├── main-layout/
-│   │   │       └── navigation/
+│   │   │   └── shared/
+│   │   │       └── components/
+│   │   │           └── unauthorized/
 │   │   ├── assets/
 │   │   ├── environments/
 │   │   │   ├── environment.ts
-│   │   │   └── environment.development.ts
+│   │   │   ├── environment.development.ts
+│   │   │   └── environment.production.ts
 │   │   ├── index.html
 │   │   ├── main.ts
 │   │   └── styles.scss
