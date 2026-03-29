@@ -1,41 +1,42 @@
 ---
+
 description: |
-  Runs daily to keep repository documentation up to date. Identifies documentation
-  files that are out of sync with recent code changes and opens a pull request
-  with the necessary updates.
+Runs daily to keep repository documentation up to date. Identifies documentation
+files that are out of sync with recent code changes and opens a pull request
+with the necessary updates.
 
 on:
-  schedule: daily on weekdays
-  workflow_dispatch:
+schedule: daily on weekdays
+workflow_dispatch:
 
 permissions:
-  contents: read
-  pull-requests: read
-  issues: read
+contents: read
+pull-requests: read
+issues: read
 
 network:
-  allowed:
-    - defaults
-    - java
+allowed:
+- defaults
+- java
 
 checkout:
-  fetch-depth: 0
+fetch-depth: 0
 
 tools:
-  github:
-    mode: remote
-    toolsets: [default]
-  edit:
-  bash: true
+github:
+mode: remote
+toolsets: [default]
+edit:
+bash: true
 
 safe-outputs:
-  create-pull-request:
-    title-prefix: "[docs] "
-    labels: [documentation, automated]
-    draft: false
+create-pull-request:
+title-prefix: "[docs] "
+labels: [documentation, automated]
+draft: false
 
 engine: copilot
----
+---------------
 
 # Documentation Sync
 
@@ -91,16 +92,16 @@ Note the changed files. Focus on changes to:
 
 For each changed source file, determine which documentation files may be out of sync:
 
-| Changed area | Likely affected docs |
-|---|---|
-| Controller endpoints (`controller/`) | `README.md`, `references/ALL_ENDPOINTS_REFERENCE.md` |
-| Entities or DTOs (`entity/`, `dto/`) | `README.md`, `references/ALL_ENDPOINTS_REFERENCE.md` |
-| Security / config (`config/`, `SecurityConfig`) | `README.md`, `references/ANGULAR_SECURITY_GUIDE.md` |
-| Frontend components / routing (`frontend/src/`) | `frontend/README.md`, `references/ANGULAR_FRONTEND_DETAILED_PLAN.md` |
-| Backend tests (`backend/src/test/`) | `tests/README.md` |
-| Scripts (`scripts/`) | `scripts/README.md` |
+|                         Changed area                          |                                Likely affected docs                                |
+|---------------------------------------------------------------|------------------------------------------------------------------------------------|
+| Controller endpoints (`controller/`)                          | `README.md`, `references/ALL_ENDPOINTS_REFERENCE.md`                               |
+| Entities or DTOs (`entity/`, `dto/`)                          | `README.md`, `references/ALL_ENDPOINTS_REFERENCE.md`                               |
+| Security / config (`config/`, `SecurityConfig`)               | `README.md`, `references/ANGULAR_SECURITY_GUIDE.md`                                |
+| Frontend components / routing (`frontend/src/`)               | `frontend/README.md`, `references/ANGULAR_FRONTEND_DETAILED_PLAN.md`               |
+| Backend tests (`backend/src/test/`)                           | `tests/README.md`                                                                  |
+| Scripts (`scripts/`)                                          | `scripts/README.md`                                                                |
 | Docker / Keycloak / CI (`docker-compose*.yml`, `Jenkinsfile`) | `README.md`, `references/JENKINS_SETUP.md`, `references/JENKINS_PIPELINE_GUIDE.md` |
-| Maven dependencies (`pom.xml`) | `README.md` (tech stack section) |
+| Maven dependencies (`pom.xml`)                                | `README.md` (tech stack section)                                                   |
 
 ### Step 3 — Read source files and documentation
 
@@ -144,3 +145,4 @@ Simply output a brief summary explaining that all documentation is up to date.
   source code.
 - If you are uncertain whether a change is significant enough to warrant a doc update,
   err on the side of updating.
+

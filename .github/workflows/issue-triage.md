@@ -1,35 +1,36 @@
 ---
+
 description: |
-  This workflow automatically triages new issues as they are opened. It labels
-  them by type and priority, searches for duplicates, asks clarifying questions
-  when the description is unclear, and assigns them to the right team members.
+This workflow automatically triages new issues as they are opened. It labels
+them by type and priority, searches for duplicates, asks clarifying questions
+when the description is unclear, and assigns them to the right team members.
 
 on:
-  issues:
-    types: [opened]
-  roles: all
+issues:
+types: [opened]
+roles: all
 
 permissions:
-  contents: read
-  issues: read
-  pull-requests: read
+contents: read
+issues: read
+pull-requests: read
 
 network: defaults
 
 tools:
-  github:
-    lockdown: false
-    min-integrity: none
-    allowed-repos: all
-    toolsets: [default]
+github:
+lockdown: false
+min-integrity: none
+allowed-repos: all
+toolsets: [default]
 
 safe-outputs:
-  mentions: false
-  add-comment:
-    max: 1
-  update-issue:
-    max: 1
----
+mentions: false
+add-comment:
+max: 1
+update-issue:
+max: 1
+------
 
 # Issue Triage Agent
 
@@ -41,15 +42,15 @@ Your task is to triage the newly opened issue by performing all of the steps bel
 
 Analyze the issue title and body and determine the most appropriate type label from this list:
 
-| Label | When to use |
-|---|---|
-| `bug` | Reports of incorrect or unexpected behavior, errors, crashes |
-| `enhancement` | Requests to improve existing functionality |
-| `feature-request` | Requests for new functionality that does not yet exist |
-| `documentation` | Issues about missing, incorrect, or unclear docs |
-| `question` | Requests for help or clarification, not a defect or request |
-| `security` | Potential security vulnerabilities or auth issues |
-| `dependencies` | Library upgrade or dependency management issues |
+|       Label       |                         When to use                          |
+|-------------------|--------------------------------------------------------------|
+| `bug`             | Reports of incorrect or unexpected behavior, errors, crashes |
+| `enhancement`     | Requests to improve existing functionality                   |
+| `feature-request` | Requests for new functionality that does not yet exist       |
+| `documentation`   | Issues about missing, incorrect, or unclear docs             |
+| `question`        | Requests for help or clarification, not a defect or request  |
+| `security`        | Potential security vulnerabilities or auth issues            |
+| `dependencies`    | Library upgrade or dependency management issues              |
 
 Apply **exactly one** type label.
 
@@ -57,12 +58,12 @@ Apply **exactly one** type label.
 
 Based on the impact and urgency described, apply **exactly one** priority label:
 
-| Label | Criteria |
-|---|---|
+|        Label         |                                Criteria                                |
+|----------------------|------------------------------------------------------------------------|
 | `priority: critical` | Production down, data loss, security breach, or auth completely broken |
-| `priority: high` | Major feature broken, significant user impact, no workaround |
-| `priority: medium` | Feature partially broken or degraded, workaround exists |
-| `priority: low` | Minor issue, cosmetic problem, or nice-to-have improvement |
+| `priority: high`     | Major feature broken, significant user impact, no workaround           |
+| `priority: medium`   | Feature partially broken or degraded, workaround exists                |
+| `priority: low`      | Minor issue, cosmetic problem, or nice-to-have improvement             |
 
 Default to `priority: medium` when priority is unclear.
 
@@ -151,3 +152,4 @@ After applying labels (and assignees where appropriate), post **one comment** su
 3. Apply type, priority, and any status labels via `update-issue`
 4. Assign team member(s) if confident
 5. Post a single triage comment via `add-comment`
+
