@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17 (Eclipse Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: temurin
+          cache: maven
+
+      - name: Check code formatting (Spotless)
+        run: mvn --batch-mode spotless:check
+        working-directory: .
+
+      - name: Compile
+        run: mvn --batch-mode --errors compile -DskipTests
+        working-directory: .
+
+      - name: Run unit tests
+        run: mvn --batch-mode test -Dtest='!*IntegrationTest,!*IT' -pl backend
+        working-directory: .
+
+      - name: Run integration tests + enforce JaCoCo coverage gate (Testcontainers)
+        run: |
+          mvn --batch-mode verify \
+            -Dtest='*IntegrationTest,*IT' \
+            -Dsurefire.failIfNoSpecifiedTests=false \
+            -pl backend
+        working-directory: .
+
+      - name: Upload JaCoCo XML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: backend/target/site/jacoco/
+          retention-days: 14
+
+      - name: Publish unit test results
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Unit Test Results
+          path: backend/target/surefire-reports/**/*.xml
+          reporter: java-junit
+          fail-on-error: false
+
+      - name: Publish integration test results
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Integration Test Results
+          path: backend/target/failsafe-reports/**/*.xml
+          reporter: java-junit
+          fail-on-error: false
