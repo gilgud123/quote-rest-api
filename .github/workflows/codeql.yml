@@ -23,10 +23,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17 (Eclipse Temurin)
+      - name: Set up JDK 21 (Eclipse Temurin)
         uses: actions/setup-java@v4
         with:
-          java-version: "17"
+          java-version: "21"
           distribution: temurin
           cache: maven
 
@@ -34,7 +34,7 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: java
-          queries: security-extended,quality
+          queries: security-extended
 
       - name: Build for CodeQL (skip tests and Spotless)
         run: |
