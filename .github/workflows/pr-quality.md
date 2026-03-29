@@ -1,43 +1,44 @@
 ---
+
 description: |
-  Runs on every pull request to enforce quality standards: posts a JaCoCo
-  coverage delta comment, auto-labels the PR by changed file areas, checks
-  that the PR title follows Conventional Commits format, and warns when
-  Java source files are changed without corresponding test coverage.
+Runs on every pull request to enforce quality standards: posts a JaCoCo
+coverage delta comment, auto-labels the PR by changed file areas, checks
+that the PR title follows Conventional Commits format, and warns when
+Java source files are changed without corresponding test coverage.
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
-  roles: all
+pull_request:
+types: [opened, synchronize, reopened, ready_for_review]
+roles: all
 
 permissions:
-  contents: read
-  pull-requests: read
-  issues: read
+contents: read
+pull-requests: read
+issues: read
 
 network:
-  allowed:
-    - defaults
-    - java
+allowed:
+- defaults
+- java
 
 checkout:
-  fetch-depth: 0
+fetch-depth: 0
 
 tools:
-  github:
-    mode: remote
-    toolsets: [default]
-  bash: true
+github:
+mode: remote
+toolsets: [default]
+bash: true
 
 safe-outputs:
-  mentions: false
-  add-comment:
-    max: 1
-  update-pull-request:
-    max: 1
+mentions: false
+add-comment:
+max: 1
+update-pull-request:
+max: 1
 
 engine: copilot
----
+---------------
 
 # PR Quality Gate Agent
 
@@ -62,17 +63,17 @@ git diff --name-only "$BASE"...HEAD
 
 Categorise each changed file into one or more of the following areas:
 
-| Area | Pattern |
-|------|---------|
-| `backend` | `backend/src/main/java/**` |
-| `tests` | `backend/src/test/java/**` |
-| `docker` | `Dockerfile*`, `docker-compose*.yml`, `.dockerignore` |
-| `security` | `backend/src/main/java/**/config/Security*.java`, `backend/src/main/java/**/config/Keycloak*.java`, `backend/src/main/java/**/config/Allowed*.java` |
-| `dependencies` | `pom.xml`, `backend/pom.xml`, `frontend/package.json`, `frontend/package-lock.json` |
-| `ci` | `.github/workflows/**`, `.github/dependabot.yml`, `Jenkinsfile*` |
-| `documentation` | `*.md`, `references/**`, `scripts/README.md` |
-| `frontend` | `frontend/src/**` |
-| `api` | `backend/src/main/java/**/controller/**`, `postman/**` |
+|      Area       |                                                                       Pattern                                                                       |
+|-----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `backend`       | `backend/src/main/java/**`                                                                                                                          |
+| `tests`         | `backend/src/test/java/**`                                                                                                                          |
+| `docker`        | `Dockerfile*`, `docker-compose*.yml`, `.dockerignore`                                                                                               |
+| `security`      | `backend/src/main/java/**/config/Security*.java`, `backend/src/main/java/**/config/Keycloak*.java`, `backend/src/main/java/**/config/Allowed*.java` |
+| `dependencies`  | `pom.xml`, `backend/pom.xml`, `frontend/package.json`, `frontend/package-lock.json`                                                                 |
+| `ci`            | `.github/workflows/**`, `.github/dependabot.yml`, `Jenkinsfile*`                                                                                    |
+| `documentation` | `*.md`, `references/**`, `scripts/README.md`                                                                                                        |
+| `frontend`      | `frontend/src/**`                                                                                                                                   |
+| `api`           | `backend/src/main/java/**/controller/**`, `postman/**`                                                                                              |
 
 ---
 
@@ -80,17 +81,17 @@ Categorise each changed file into one or more of the following areas:
 
 Apply labels to the PR based on the areas detected in step 1. Use these label mappings:
 
-| Area | Label |
-|------|-------|
-| `backend` | `backend` |
-| `tests` | `tests` |
-| `docker` | `docker` |
-| `security` | `security` |
-| `dependencies` | `dependencies` |
-| `ci` | `ci` |
+|      Area       |      Label      |
+|-----------------|-----------------|
+| `backend`       | `backend`       |
+| `tests`         | `tests`         |
+| `docker`        | `docker`        |
+| `security`      | `security`      |
+| `dependencies`  | `dependencies`  |
+| `ci`            | `ci`            |
 | `documentation` | `documentation` |
-| `frontend` | `frontend` |
-| `api` | `api` |
+| `frontend`      | `frontend`      |
+| `api`           | `api`           |
 
 Apply all matching labels. If no labels apply (e.g. only config files changed), apply `chore`.
 
@@ -152,6 +153,7 @@ Check if a JaCoCo XML report exists in the repository from the most recent CI ru
 If `backend/target/site/jacoco/jacoco.xml` is accessible:
 
 1. Parse the total line coverage percentage from the XML:
+
    ```bash
    # Extract missed and covered line counts from jacoco.xml
    grep -E 'type="LINE"' backend/target/site/jacoco/jacoco.xml | tail -1
@@ -206,3 +208,4 @@ encouraging note if all checks pass.
 5. Check for missing test files
 6. Check JaCoCo coverage if available
 7. Post one consolidated quality report comment via `add-comment`
+

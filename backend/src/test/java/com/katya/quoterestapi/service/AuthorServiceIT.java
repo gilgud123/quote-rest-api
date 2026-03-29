@@ -79,11 +79,11 @@ class AuthorServiceIT {
     @Test
     @DisplayName("Should get author by ID with quotes")
     void getAuthorById_whenExists_returnsAuthorWithQuotes() {
-      Author socrates = authorRepository.findByName("Socrates").orElseThrow();
+      Author aristotle = authorRepository.findByName("Aristotle").orElseThrow();
 
-      AuthorDTO result = authorService.getAuthorById(socrates.getId());
+      AuthorDTO result = authorService.getAuthorById(aristotle.getId());
 
-      assertThat(result.name()).isEqualTo("Socrates");
+      assertThat(result.name()).isEqualTo("Aristotle");
       assertThat(result.quotes()).isNotNull();
       assertThat(result.quotes()).hasSize(4);
     }
