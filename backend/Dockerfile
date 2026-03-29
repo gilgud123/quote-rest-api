@@ -1,6 +1,6 @@
 # Multi-stage Dockerfile for Spring Boot Quote REST API (Multi-module structure)
 # Stage 1: Build the application
-FROM maven:3.9-eclipse-temurin-17 AS build
+FROM maven:3-eclipse-temurin-25 AS build
 
 WORKDIR /app
 
