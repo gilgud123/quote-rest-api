@@ -18,7 +18,7 @@ COPY frontend/pom.xml ./frontend/pom.xml
 RUN mvn clean install -pl backend -am -DskipTests -Dspotless.check.skip=true -B
 
 # Stage 2: Create the runtime image
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 
 WORKDIR /app
 
