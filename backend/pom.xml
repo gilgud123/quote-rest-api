@@ -19,7 +19,7 @@
     <java.version>17</java.version>
     <spring-boot.version>3.2.1</spring-boot.version>
     <mapstruct.version>1.5.5.Final</mapstruct.version>
-    <lombok.version>1.18.30</lombok.version>
+    <lombok.version>1.18.44</lombok.version>
     <testcontainers.version>1.19.3</testcontainers.version>
     <spotless.version>2.43.0</spotless.version>
   </properties>
