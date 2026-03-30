@@ -18,7 +18,7 @@
     <node.version>v22.12.0</node.version>
     <npm.version>10.9.2</npm.version>
     <frontend-maven-plugin.version>1.15.1</frontend-maven-plugin.version>
-    <spotless.version>2.43.0</spotless.version>
+    <spotless.version>3.4.0</spotless.version>
   </properties>
 
   <build>
