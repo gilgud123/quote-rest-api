@@ -215,6 +215,8 @@ JaCoCo report:
 - HTML: `target/site/jacoco/index.html`
 - XML: `target/site/jacoco/jacoco.xml`
 
+A **minimum line coverage of 70%** is enforced during `mvn verify`. The build fails if coverage drops below this threshold.
+
 ## Code Formatting
 
 This project uses **Spotless** to enforce consistent code formatting. See [SPOTLESS.md](references/SPOTLESS.md) for details.
@@ -247,9 +249,29 @@ docker-compose up -d postgres
 # 3. Use Copilot to test and inspect your API
 ```
 
+## CI/CD with GitHub Actions
+
+The project ships several GitHub Actions workflows triggered on push/PR to `main`/`master`:
+
+| Workflow | File | Description |
+|---|---|---|
+| **CI** | `ci.yml` | Compile, unit tests, integration tests (Testcontainers), JaCoCo coverage gate, test-result publishing |
+| **Docker Build, Scan & Publish** | `docker-publish.yml` | Builds the backend Docker image, runs a Trivy vulnerability scan, and pushes to GitHub Container Registry (`ghcr.io`) on `main`/`master` and version tags |
+| **CodeQL Security Analysis** | `codeql.yml` | Static security analysis for Java; runs on push/PR and on a weekly schedule (Monday 08:00 UTC) |
+| **API Contract Tests** | `api-contract.yml` | Spins up the full stack (Docker Compose) and runs the Postman collection via Newman |
+
+### Dependabot
+
+Automated dependency updates are configured in `.github/dependabot.yml` and run weekly (Monday 07:00 Amsterdam time) for:
+- Maven dependencies (grouped: Spring Boot, Testcontainers, MapStruct, Spotless, SpringDoc)
+- GitHub Actions versions
+- Docker base images (`backend/Dockerfile`)
+
+---
+
 ## CI/CD with Jenkins
 
-This project includes a complete Jenkins CI/CD pipeline for automated builds, testing, and Docker image creation.
+This project also includes a Jenkins CI/CD pipeline for local or self-hosted automated builds, testing, and Docker image creation.
 
 ### Quick Start
 

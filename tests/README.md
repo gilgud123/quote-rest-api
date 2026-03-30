@@ -115,3 +115,7 @@ Test results are saved to:
 - JSON report: `test-results/results.json`
 - Screenshots (on failure): `test-results/`
 - Videos (on failure): `test-results/`
+
+## API Contract Tests (GitHub Actions)
+
+In addition to the Playwright tests above, a **Newman-based API contract test** workflow is configured in `.github/workflows/api-contract.yml`. It runs the Postman collection located at `postman/Quote REST API.postman_collection.json` against the full Docker Compose stack on every push to `main`/`master`. Results are published as JUnit reports in the GitHub Actions run summary.
