@@ -21,6 +21,8 @@ Full-stack application for managing authors and their quotes. Backend built with
   - Code formatting with Spotless
   - Docker Compose for development
   - MCP servers for AI-assisted development
+  - GitHub Actions CI/CD (build, test, coverage gate, CodeQL security scan, Docker publish)
+  - Automated dependency updates via Dependabot
 
 ## Tech Stack
 
@@ -215,6 +217,12 @@ JaCoCo report:
 - HTML: `target/site/jacoco/index.html`
 - XML: `target/site/jacoco/jacoco.xml`
 
+A **70% minimum line coverage** gate is enforced during the `verify` phase. The build fails if coverage drops below this threshold:
+
+```bash
+mvn verify  # runs tests and checks coverage gate
+```
+
 ## Code Formatting
 
 This project uses **Spotless** to enforce consistent code formatting. See [SPOTLESS.md](references/SPOTLESS.md) for details.
@@ -246,6 +254,31 @@ docker-compose up -d postgres
 
 # 3. Use Copilot to test and inspect your API
 ```
+
+## GitHub Actions CI/CD
+
+GitHub Actions provides automated CI/CD on every push and pull request to `main`/`master`.
+
+### Workflows
+
+| Workflow | Trigger | What it does |
+|---|---|---|
+| **CI** (`ci.yml`) | Push / PR | Build, unit tests, integration tests (Testcontainers), JaCoCo coverage gate (≥70%) |
+| **Docker Publish** (`docker-publish.yml`) | Push to `main`/`master`, version tags | Build image, Trivy vulnerability scan, push to GHCR |
+| **CodeQL** (`codeql.yml`) | Push / PR / weekly schedule | Static security analysis for Java |
+| **Dependabot** (`dependabot.yml`) | Weekly (Monday) | Automated dependency update PRs for Maven and GitHub Actions |
+
+### Docker Image
+
+The Docker image is published to GitHub Container Registry:
+
+```
+ghcr.io/gilgud123/quote-rest-api:<tag>
+```
+
+Tags are generated from the branch name, semantic version (`v*.*.*`), and short commit SHA.
+
+---
 
 ## CI/CD with Jenkins
 
